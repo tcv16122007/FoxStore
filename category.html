@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục sản phẩm – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">Trang chủ</a> / <span id="breadcrumbCurrent">Tất cả sản phẩm</span>
+        </div>
+        <div class="category-layout">
+            <aside class="filter-sidebar">
+                <div class="filter-block">
+                    <div class="filter-title">📦 Nhóm sản phẩm</div>
+                    <label class="filter-option"><input type="radio" name="group" value="" onchange="applyFilter()"
+                            checked> Tất cả</label>
+                    <label class="filter-option"><input type="radio" name="group" value="new" onchange="applyFilter()">
+                        🆕 Sản phẩm mới</label>
+                    <label class="filter-option"><input type="radio" name="group" value="hot" onchange="applyFilter()">
+                        🔥 Sản phẩm hot</label>
+                    <label class="filter-option"><input type="radio" name="group" value="sale" onchange="applyFilter()">
+                        💥 Khuyến mãi</label>
+                    <label class="filter-option"><input type="radio" name="group" value="out" onchange="applyFilter()">
+                        🚫 Hết hàng</label>
+                </div>
+                <div class="filter-block">
+                    <div class="filter-title">🗂️ Danh mục</div>
+                    <div id="categoryList"></div>
+                </div>
+                <div class="filter-block">
+                    <div class="filter-title">🏷️ Thương hiệu</div>
+                    <div id="brandList"></div>
+                </div>
+                <div class="filter-block">
+                    <div class="filter-title">💰 Khoảng giá (₫)</div>
+                    <div class="price-range">
+                        <input type="number" id="priceMin" placeholder="Từ" min="0" oninput="applyFilter()">
+                        <span style="color:var(--muted)">–</span>
+                        <input type="number" id="priceMax" placeholder="Đến" min="0" oninput="applyFilter()">
+                    </div>
+                </div>
+                <button class="btn btn-outline" style="width:100%;margin-top:16px" onclick="resetFilter()">🔄 Xóa bộ
+                    lọc</button>
+            </aside>
+
+            <main>
+                <div class="toolbar">
+                    <div class="toolbar-info">Hiển thị <b id="resultCount">0</b> sản phẩm</div>
+                    <div class="toolbar-sort">
+                        <label>Sắp xếp:</label>
+                        <select id="sortSelect" onchange="applyFilter()">
+                            <option value="default">Mặc định</option>
+                            <option value="price-asc">Giá tăng dần</option>
+                            <option value="price-desc">Giá giảm dần</option>
+                            <option value="name-asc">Tên A → Z</option>
+                            <option value="name-desc">Tên Z → A</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="active-filters" id="activeFilters"></div>
+                <div class="product-grid" id="categoryGrid"></div>
+                <div class="empty-state" id="emptyState" style="display:none">
+                    <div class="icon">🔍</div>
+                    <h3 style="color:var(--text);margin-bottom:8px">Không tìm thấy sản phẩm</h3>
+                    <p>Thử thay đổi bộ lọc hoặc xóa bộ lọc.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/category.js"></script>
+</body>
+
+</html>

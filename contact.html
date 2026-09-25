@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liên hệ – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <h1 class="section-title">📬 Liên hệ với Fox Store</h1>
+        <div class="contact-grid">
+            <div class="contact-form-box">
+                <h3 style="margin-bottom:16px">Gửi tin nhắn cho chúng tôi</h3>
+                <form onsubmit="handleContact(event)">
+                    <div class="form-group">
+                        <label>Họ tên</label>
+                        <input type="text" class="form-control" id="contactName" placeholder="Nguyễn Văn A">
+                        <div class="error-msg" id="contactNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="text" class="form-control" id="contactEmail" placeholder="you@example.com">
+                        <div class="error-msg" id="contactEmailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="text" class="form-control" id="contactPhone" placeholder="0912345678">
+                        <div class="error-msg" id="contactPhoneError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nội dung</label>
+                        <textarea class="form-control" id="contactMsg" rows="5"
+                            placeholder="Nhập nội dung..."></textarea>
+                        <div class="error-msg" id="contactMsgError"></div>
+                    </div>
+                    <button type="submit" class="btn" style="width:100%">📨 Gửi liên hệ</button>
+                </form>
+            </div>
+            <div>
+                <div class="geo-box">
+                    <h3 style="margin-bottom:12px">📍 Tìm cửa hàng gần nhất</h3>
+                    <p style="color:var(--muted);margin-bottom:16px">Cho phép truy cập vị trí để tìm cửa hàng Fox Store
+                        gần bạn nhất.</p>
+                    <button class="btn" onclick="findNearestStore()">🗺️ Định vị cửa hàng</button>
+                    <div id="geoResult" style="margin-top:20px"></div>
+                </div>
+                <div class="geo-box">
+                    <h3 style="margin-bottom:12px">📞 Thông tin liên hệ</h3>
+                    <p style="color:var(--muted);line-height:2">
+                        📧 <b style="color:var(--accent)">contact@foxstore.com</b><br>
+                        📞 <b style="color:var(--accent)">0987654321</b><br>
+                        📍 <b style="color:var(--accent)">Đà Nẵng</b><br>
+                        🕐 8h đến 22h hàng ngày
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            injectLayout("contact");
+            const u = getCurrentUser();
+            const box = document.getElementById("contactActions");
+
+            if (u) {
+                box.innerHTML = `
+      <div style="color:var(--accent);font-weight:600;margin-bottom:12px">
+        ✅ Đang chuyển đến trang tin nhắn...
+      </div>
+      <a href="messages.html" class="btn" style="width:100%">💬 Mở tin nhắn</a>
+    `;
+                setTimeout(() => location.href = "messages.html", 1200);
+            } else {
+                box.innerHTML = `
+      <p style="color:var(--muted);margin-bottom:20px">Vui lòng đăng nhập để chat với chúng tôi:</p>
+      <a href="login.html" class="btn" style="width:100%">🔐 Đăng nhập để chat</a>
+    `;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:20px">🔔 Thông báo</h1>
+        <div id="notifList"></div>
+    </div>
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        function renderNotifs() {
+            const box = document.getElementById("notifList");
+            const u = getCurrentUser();
+            if (!u) return;
+
+            const notifs = getNotifications(u.email);
+
+            if (!notifs.length) {
+                box.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🔕</div>
+        <h3 style="color:var(--text);margin-bottom:8px">Không có thông báo</h3>
+        <p>Bạn đã cập nhật hết thông tin mới nhất.</p>
+      </div>`;
+                return;
+            }
+
+            box.innerHTML = notifs.map(n => {
+                const isBroadcast = n.type === "broadcast";
+                const bg = isBroadcast ? "linear-gradient(135deg, rgba(255,107,0,.08), rgba(255,107,0,.02))" : "var(--card)";
+                const borderColor = isBroadcast ? "var(--accent)" : "var(--border)";
+                return `
+      <a href="${n.link}" class="notif-item" onclick="handleNotifClick(event, '${n.type}', '${n.id}')"
+         style="background:${bg};border-color:${borderColor}">
+        <div class="notif-icon">${n.icon}</div>
+        <div class="notif-body">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-text">${n.text}</div>
+          <div class="notif-time">${formatTimeAgo(n.timestamp)}</div>
+        </div>
+      </a>`;
+            }).join("");
+        }
+
+        function handleNotifClick(e, type, id) {
+            if (type === "message") {
+                const msgId = parseFloat(id.replace("msg_", ""));
+                const msgs = getMessages();
+                const m = msgs.find(x => x.id === msgId);
+                if (m) { m.read = true; saveMessages(msgs); }
+            }
+        }
+
+        function formatTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            const m = Math.floor(diff / 60000);
+            if (m < 1) return "Vừa xong";
+            if (m < 60) return `${m} phút trước`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h} giờ trước`;
+            const d = Math.floor(h / 24);
+            if (d < 7) return `${d} ngày trước`;
+            return new Date(ts).toLocaleDateString("vi-VN");
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireUser(true)) return;
+            if (isAdmin()) injectAdminLayout();
+            else if (isShipper()) injectShipperLayout();
+            else injectLayout("");
+            renderNotifs();
+            setTimeout(() => {
+                updateNotifBadge();
+                updateMsgBadge();
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

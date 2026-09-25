@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipper – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1 class="section-title" style="margin-bottom:4px">🚚 Shipper Panel</h1>
+                <p style="color:var(--muted);font-size:14px">Nhận đơn gần khu vực của bạn và cập nhật trạng thái giao
+                    hàng.</p>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="active" data-tab="mine" onclick="switchShipperTab('mine')">📦 Đơn của tôi</button>
+            <button data-tab="new" onclick="switchShipperTab('new')">🆕 Nhận đơn mới</button>
+            <button data-tab="history" onclick="switchShipperTab('history')">✅ Lịch sử</button>
+        </div>
+
+        <!-- ═══ TAB ĐƠN CỦA TÔI ═══ -->
+        <div id="tabMine">
+            <div class="ship-summary" id="mineStats"></div>
+            <div id="mineList"></div>
+        </div>
+
+        <!-- ═══ TAB NHẬN ĐƠN MỚI ═══ -->
+        <div id="tabNew" style="display:none">
+            <div class="admin-sort-bar">
+                <label>📍 Lọc theo khu vực:</label>
+                <select id="filterCity" onchange="renderNewOrders()"
+                    style="padding:8px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;cursor:pointer">
+                    <option value="">🌐 Tất cả thành phố</option>
+                </select>
+                <button class="btn btn-outline" onclick="autoDetectArea()" style="padding:8px 14px;font-size:13px">📍 Tự
+                    phát hiện vị trí</button>
+                <span style="color:var(--muted);font-size:12px;margin-left:auto" id="areaHint"></span>
+            </div>
+            <div id="newOrdersList"></div>
+        </div>
+
+        <!-- ═══ TAB LỊCH SỬ ═══ -->
+        <div id="tabHistory" style="display:none">
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        const me = getCurrentUser();
+
+        /* ═══ SWITCH TAB ═══ */
+        function switchShipperTab(tab) {
+            document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+            document.getElementById("tabMine").style.display = tab === "mine" ? "block" : "none";
+            document.getElementById("tabNew").style.display = tab === "new" ? "block" : "none";
+            document.getElementById("tabHistory").style.display = tab === "history" ? "block" : "none";
+            if (tab === "mine") renderMineOrders();
+            if (tab === "new") renderNewOrders();
+            if (tab === "history") renderHistoryOrders();
+        }
+
+        /* ═══ TAB "ĐƠN CỦA TÔI" ═══ */
+        function renderMineOrders() {
+            const all = JSON.parse(localStorage.getItem("fox_orders")) || [];
+            const myOrders = all.filter(o => o.shipperEmail === me.email && o.status === "shipping");
+
+            const statsBox = document.getElementById("mineStats");
+            const total = all.filter(o => o.shipperEmail === me.email).length;
+            const delivered = all.filter(o => o.shipperEmail === me.email && o.status === "delivered").length;
+            const avgStars = getShipperAvgStars(me.email);
+            const reviewCount = getShipperReviewCount(me.email);
+
+            statsBox.innerHTML = `
+    <div class="stat-card"><div class="label">Đang giao</div><div class="value">${myOrders.length}</div></div>
+    <div class="stat-card"><div class="label">Đã giao</div><div class="value" style="color:#16c784">${delivered}</div></div>
+    <div class="stat-card"><div class="label">Tổng đơn</div><div class="value">${total}</div></div>
+    <div class="stat-card"><div class="label">⭐ Đánh giá</div><div class="value" style="color:#ffb020">${avgStars ? avgStars.toFixed(1) : "—"} <span style="font-size:14px;color:var(--muted)">(${reviewCount})</span></div></div>
+  `;
+
+            const list = document.getElementById("mineList");
+            if (!myOrders.length) {
+                list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3 style="color:var(--text)">Không có đơn đang giao</h3><p>Sang tab <b>🆕 Nhận đơn mới</b> để nhận đơn.</p></div>`;
+                return;
+            }
+
+            list.innerHTML = myOrders.map(o => {
+                return `
+      <div class="ship-card">
+        <div class="ship-head">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-date">📅 ${formatDate(o.createdAt)}</div>
+          </div>
+          <span class="tag" style="background:#00a8ff;color:#000">🚚 Đang giao</span>
+        </div>
+        <div class="customer-box">
+          <h4>📞 Người nhận</h4>
+          <p><b>${o.address.name}</b></p>
+          <p>SĐT: <span class="phone-big">${o.address.phone}</span></p>
+          <p>📍 ${formatAddress(o.address)}</p>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-weight:700;margin-bottom:10px;font-size:14px">📦 Sản phẩm (${o.items.length})</div>
+          ${o.items.map(i => `
+            <div class="order-item" style="padding:8px 0;border-bottom:1px solid var(--border)">
+              <img src="${i.image}" style="width:44px;height:44px">
+              <div style="flex:1"><div style="font-size:13px;font-weight:600">${i.name}</div><div style="color:var(--muted);font-size:12px">SL: ${i.qty} × ${fmt(i.price)}</div></div>
+            </div>`).join("")}
+        </div>
+        <div class="order-total"><span>💰 Tổng thu (COD)</span><span>${fmt(o.total)}</span></div>
+        <button class="btn" style="width:100%;margin-top:16px;background:#16c784;color:#000" onclick="handleDelivered('${o.id}')">✅ Xác nhận đã giao thành công</button>
+      </div>`;
+            }).join("");
+        }
+
+        /* ═══ TAB "NHẬN ĐƠN MỚI" ═══ */
+        function renderNewOrders() {
+            const cityFilter = document.getElementById("filterCity").value;
+            const list = getUnclaimedOrders(cityFilter);
+            const box = document.getElementById("newOrdersList");
+
+            if (!list.length) {
+                box.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h3 style="color:var(--text)">Không có đơn chờ nhận</h3><p>${cityFilter ? `Không có đơn nào ở ${cityFilter}` : "Hiện chưa có đơn nào cần giao"}</p></div>`;
+                return;
+            }
+
+            box.innerHTML = list.map(o => `
+    <div class="ship-card new-order-card">
+      <div class="ship-head">
+        <div>
+          <div class="order-id">#${o.id}</div>
+          <div class="order-date">📅 ${formatDate(o.createdAt)}</div>
+        </div>
+        <span class="tag" style="background:#ffb020;color:#000">⏳ Chờ nhận</span>
+      </div>
+      <div class="customer-box">
+        <h4>📍 Điểm giao hàng</h4>
+        <p><b>${o.address.name}</b> – <span class="phone-big">${o.address.phone}</span></p>
+        <p>🏙️ <b style="color:#00a8ff">${o.address.city}</b> – ${o.address.district}</p>
+        <p>${o.address.detail}</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;color:var(--muted)">${o.items.length} sản phẩm</div>
+          <div style="color:var(--accent);font-weight:700">${fmt(o.total)}</div>
+        </div>
+        <button class="btn" style="background:#00a8ff;color:#000" onclick="handleClaim('${o.id}')">🚚 Nhận đơn này</button>
+      </div>
+    </div>
+  `).join("");
+        }
+
+        /* ═══ TAB LỊCH SỬ ═══ */
+        function renderHistoryOrders() {
+            const all = JSON.parse(localStorage.getItem("fox_orders")) || [];
+            const myDone = all.filter(o => o.shipperEmail === me.email && o.status === "delivered");
+            const box = document.getElementById("historyList");
+
+            if (!myDone.length) {
+                box.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3 style="color:var(--text)">Chưa có đơn đã giao</h3></div>`;
+                return;
+            }
+
+            box.innerHTML = myDone.map(o => {
+                const review = getShipperReviewByOrder(o.id);
+                return `
+      <div class="ship-card delivered" style="border-left-color:#16c784">
+        <div class="ship-head">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-date">📅 Giao lúc: ${formatDate(o.updatedAt)}</div>
+          </div>
+          <span class="tag" style="background:#16c784;color:#000">✅ Đã giao</span>
+        </div>
+        <div style="padding:12px;background:var(--bg-2);border-radius:8px;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--muted)">👤 ${o.address.name} – ${o.address.phone}</div>
+          <div style="font-size:13px;color:var(--muted)">📍 ${formatAddress(o.address)}</div>
+        </div>
+        ${review ? `
+          <div style="padding:14px;background:rgba(255,176,32,.1);border:1px solid #ffb020;border-radius:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <b style="color:#ffb020">⭐ Đánh giá từ khách:</b>
+              <span>${starsDisplay(review.stars, 18)} <b style="color:#ffb020">${review.stars}/5</b></span>
+            </div>
+            ${review.comment ? `<p style="color:var(--text);font-size:13px;font-style:italic">"${review.comment}"</p>` : ""}
+          </div>
+        ` : `<p style="color:var(--muted);font-size:13px;text-align:center">Chưa có đánh giá từ khách</p>`}
+      </div>`;
+            }).join("");
+        }
+
+        /* ═══ NHẬN ĐƠN ═══ */
+        function handleClaim(orderId) {
+            if (!confirm("Bạn muốn nhận đơn này?")) return;
+            const res = shipperClaimOrder(orderId);
+            if (res === true) {
+                showToast("✅ Đã nhận đơn! Sang tab Đơn của tôi để giao.");
+                renderNewOrders();
+            } else {
+                showToast("❌ " + (res.error || "Không thể nhận đơn"));
+                renderNewOrders();
+            }
+        }
+
+        /* ═══ XÁC NHẬN ĐÃ GIAO ═══ */
+        function handleDelivered(orderId) {
+            if (!confirm("Xác nhận đã giao hàng thành công?\nUser sẽ có thể đánh giá sản phẩm và shipper.")) return;
+            if (updateOrderStatus(orderId, "delivered")) {
+                showToast("✅ Đã cập nhật: Giao hàng thành công!");
+                renderMineOrders();
+            } else {
+                showToast("❌ Không thể cập nhật!");
+            }
+        }
+
+        /* ═══ ĐỊNH VỊ KHU VỰC ═══ */
+        function autoDetectArea() {
+            if (!navigator.geolocation) return showToast("❌ Trình duyệt không hỗ trợ Geolocation");
+            showToast("📍 Đang xác định vị trí...");
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const { latitude: lat, longitude: lng } = pos.coords;
+                    // Tâm các thành phố
+                    const cityCenters = {
+                        "Đà Nẵng": { lat: 16.0544, lng: 108.2022 },
+                        "Hà Nội": { lat: 21.0285, lng: 105.8542 },
+                        "TP. Hồ Chí Minh": { lat: 10.7769, lng: 106.7009 },
+                        "Cần Thơ": { lat: 10.0452, lng: 105.7469 },
+                        "Hải Phòng": { lat: 20.8449, lng: 106.6881 }
+                    };
+                    let nearest = null, minDist = Infinity;
+                    for (const [city, c] of Object.entries(cityCenters)) {
+                        const d = distanceKm(lat, lng, c.lat, c.lng);
+                        if (d < minDist) { minDist = d; nearest = city; }
+                    }
+                    if (minDist < 60) {
+                        document.getElementById("filterCity").value = nearest;
+                        document.getElementById("areaHint").textContent = `📍 Khu vực: ${nearest} (cách ${minDist.toFixed(1)} km)`;
+                        renderNewOrders();
+                        showToast(`📍 Đã chọn khu vực: ${nearest}`);
+                    } else {
+                        showToast(`📍 Bạn cách ${nearest} ${minDist.toFixed(0)} km. Chọn thủ công.`);
+                    }
+                },
+                () => showToast("❌ Không lấy được vị trí!"),
+                { timeout: 10000 }
+            );
+        }
+
+        /* ═══ INIT ═══ */
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireShipper()) return;
+            injectShipperLayout();
+
+            // Fill city select
+            const sel = document.getElementById("filterCity");
+            Object.keys(CITIES).forEach(c => {
+                sel.innerHTML += `<option value="${c}">🏙️ ${c}</option>`;
+            });
+
+            switchShipperTab("mine");
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>So sánh sản phẩm – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h1 class="section-title" style="margin-bottom:4px">⚖️ So sánh sản phẩm</h1>
+                <p style="color:var(--muted);font-size:14px">Đặt 2 sản phẩm cạnh nhau để xem sản phẩm nào đáng mua hơn.
+                </p>
+            </div>
+            <button class="btn btn-outline" onclick="handleClearCompare()">🗑️ Xóa tất cả</button>
+        </div>
+
+        <div class="compare-2col" id="compareGrid"></div>
+
+        <p style="color:var(--muted);font-size:13px;margin-top:20px;text-align:center">
+            💡 Cột có nền <b style="color:#16c784">xanh</b> là tiêu chí sản phẩm đó vượt trội hơn.
+        </p>
+    </div>
+    <div id="footer"></div>
+
+    <!-- MODAL PICKER -->
+    <div class="modal-overlay" id="pickerOverlay">
+        <div class="modal">
+            <h3 id="pickerTitle">Chọn sản phẩm <button class="modal-close" onclick="closePicker()">×</button></h3>
+
+            <div class="compare-picker-filter">
+                <input type="text" id="pickerSearch" placeholder="🔍 Tìm theo tên, thương hiệu..."
+                    oninput="renderPickerResults()">
+                <select id="pickerCategory" onchange="renderPickerResults()">
+                    <option value="">Tất cả danh mục</option>
+                </select>
+                <select id="pickerPrice" onchange="renderPickerResults()">
+                    <option value="">Mọi giá</option>
+                    <option value="0-500000">Dưới 500K</option>
+                    <option value="500000-2000000">500K – 2 triệu</option>
+                    <option value="2000000-5000000">2 – 5 triệu</option>
+                    <option value="5000000-999999999">Trên 5 triệu</option>
+                </select>
+            </div>
+
+            <div class="compare-picker-grid" id="pickerGrid"></div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        let pickerSlot = 0; // 0 = A, 1 = B
+
+        /* ═══ Đọc list, đảm bảo luôn có 2 slot ═══ */
+        function getSlots() {
+            const list = getCompareList();
+            return [list[0] || "", list[1] || ""];
+        }
+
+        /* ═══ RENDER 2 CỘT ═══ */
+        function renderComparePage() {
+            const grid = document.getElementById("compareGrid");
+            const [idA, idB] = getSlots();
+            const A = idA ? getProductById(idA) : null;
+            const B = idB ? getProductById(idB) : null;
+
+            grid.innerHTML = `
+    ${renderCompareColumn("A", A, 0)}
+    ${renderCompareColumn("B", B, 1)}
+  `;
+        }
+
+        function renderCompareColumn(slotName, p, slotIndex) {
+            if (!p) {
+                return `
+      <div class="compare-col">
+        <div class="compare-col-header">
+          <h3>Sản phẩm ${slotName}</h3>
+          <button onclick="openPicker(${slotIndex})">+ Thêm</button>
+        </div>
+        <div class="compare-empty-slot" onclick="openPicker(${slotIndex})">
+          <div class="plus">+</div>
+          <div>Bấm để chọn sản phẩm ${slotName}</div>
+        </div>
+      </div>`;
+            }
+
+            // Tính điểm để highlight
+            const [idA, idB] = getSlots();
+            const A = idA ? getProductById(idA) : null;
+            const B = idB ? getProductById(idB) : null;
+            const other = slotIndex === 0 ? B : A;
+
+            const cmp = (a, b) => {
+                if (!b) return "";
+                return a > b ? "win" : "";
+            };
+            const cmpReverse = (a, b) => {
+                if (!b) return "";
+                return a < b ? "win" : "";
+            };
+
+            const discount = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+            const catName = getCategories().find(c => c.slug === p.category)?.name || p.category;
+            const groupMap = { new: "Sản phẩm mới", hot: "Sản phẩm hot", sale: "Khuyến mãi" };
+
+            return `
+    <div class="compare-col">
+      <div class="compare-col-header">
+        <h3>Sản phẩm ${slotName}</h3>
+        <button onclick="openPicker(${slotIndex})">🔄 Đổi</button>
+      </div>
+
+      <div class="compare-product">
+        <img src="${p.image}" alt="${p.name}">
+        <h4>${p.name}</h4>
+      </div>
+
+      <div class="compare-fields">
+        <div class="compare-field">
+          <span class="label">Thương hiệu</span>
+          <span class="value">${p.brand}</span>
+        </div>
+        <div class="compare-field">
+          <span class="label">Danh mục</span>
+          <span class="value">${catName}</span>
+        </div>
+        <div class="compare-field">
+          <span class="label">Nhóm</span>
+          <span class="value">${groupMap[p.group] || p.group}</span>
+        </div>
+        <div class="compare-field ${cmpReverse(p.price, other?.price)}">
+          <span class="label">💰 Giá bán</span>
+          <span class="value" style="color:${cmpReverse(p.price, other?.price) === 'win' ? '#16c784' : 'var(--accent)'}">${fmt(p.price)}</span>
+        </div>
+        <div class="compare-field">
+          <span class="label">Giá gốc</span>
+          <span class="value">${p.oldPrice ? fmt(p.oldPrice) : '—'}</span>
+        </div>
+        <div class="compare-field ${cmp(discount, other ? (other.oldPrice ? Math.round((1 - other.price / other.oldPrice) * 100) : 0) : 0)}">
+          <span class="label">Giảm giá</span>
+          <span class="value">${discount ? `-${discount}%` : '—'}</span>
+        </div>
+        <div class="compare-field ${cmp(p.stock, other?.stock)}">
+          <span class="label">📦 Tồn kho</span>
+          <span class="value">${p.stock} sản phẩm</span>
+        </div>
+        <div class="compare-field">
+          <span class="label">Mô tả</span>
+          <span class="value" style="font-weight:400;font-size:12px;text-align:right">${p.desc}</span>
+        </div>
+      </div>
+
+      <div class="compare-actions">
+        <button class="btn btn-cart" style="width:100%" onclick="addToCart(${p.id})">🛒 Thêm vào giỏ</button>
+        <a href="product.html?id=${p.id}" class="btn btn-outline" style="width:100%;text-align:center">Xem chi tiết</a>
+        <button class="btn btn-outline" style="width:100%;border-color:var(--danger);color:var(--danger)" onclick="removeFromCompareSlot(${slotIndex})">✕ Bỏ khỏi so sánh</button>
+      </div>
+    </div>`;
+        }
+
+        function removeFromCompareSlot(slotIndex) {
+            const list = [...getCompareList()];
+            while (list.length < COMPARE_MAX) list.push("");
+            list[slotIndex] = "";
+            saveCompareList(list);
+            renderComparePage();
+        }
+
+        function handleClearCompare() {
+            if (!confirm("Xóa toàn bộ danh sách so sánh?")) return;
+            clearCompare();
+            renderComparePage();
+        }
+
+        /* ═══ PICKER ═══ */
+        function openPicker(slotIndex) {
+            pickerSlot = slotIndex;
+            document.getElementById("pickerTitle").innerHTML =
+                `Chọn sản phẩm cho cột ${slotIndex === 0 ? 'A' : 'B'} <button class="modal-close" onclick="closePicker()">×</button>`;
+
+            // Fill danh mục
+            const catSel = document.getElementById("pickerCategory");
+            catSel.innerHTML = `<option value="">Tất cả danh mục</option>` +
+                getCategories().map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+
+            // Reset filter
+            document.getElementById("pickerSearch").value = "";
+            catSel.value = "";
+            document.getElementById("pickerPrice").value = "";
+
+            renderPickerResults();
+            document.getElementById("pickerOverlay").classList.add("show");
+        }
+
+        function closePicker() {
+            document.getElementById("pickerOverlay").classList.remove("show");
+        }
+
+        function renderPickerResults() {
+            const kw = document.getElementById("pickerSearch").value.toLowerCase().trim();
+            const cat = document.getElementById("pickerCategory").value;
+            const priceRange = document.getElementById("pickerPrice").value;
+            const grid = document.getElementById("pickerGrid");
+
+            const [idA, idB] = getSlots();
+            const usedIds = [idA, idB].filter(Boolean);
+
+            let list = getProducts().filter(p => p.stock > 0);
+            if (kw) list = list.filter(p => p.name.toLowerCase().includes(kw) || p.brand.toLowerCase().includes(kw));
+            if (cat) list = list.filter(p => p.category === cat);
+            if (priceRange) {
+                const [min, max] = priceRange.split("-").map(Number);
+                list = list.filter(p => p.price >= min && p.price <= max);
+            }
+
+            if (!list.length) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Không tìm thấy sản phẩm nào.</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(p => {
+                const used = usedIds.includes(p.id);
+                return `
+      <div class="compare-picker-item ${used ? 'disabled' : ''}" onclick="${used ? '' : `pickProduct(${p.id})`}">
+        <img src="${p.image}" alt="">
+        <div class="name">${p.name}</div>
+        <div class="price">${fmt(p.price)}</div>
+      </div>`;
+            }).join("");
+        }
+
+        function pickProduct(id) {
+            setCompareSlot(pickerSlot, id);
+            closePicker();
+            renderComparePage();
+            updateCompareBadge();
+        }
+
+        document.addEventListener("click", e => {
+            if (e.target.id === "pickerOverlay") closePicker();
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            injectLayout("compare");
+            renderComparePage();
+        });
+    </script>
+</body>
+
+</html>

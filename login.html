@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <div class="auth-wrap">
+            <h2 style="text-align:center;margin-bottom:20px;color:var(--accent)">🦊 Fox Store</h2>
+
+            <div class="auth-hint">
+                🔑 <b>Tài khoản test:</b><br>
+                • Admin: <b>contact@foxstore.com</b> (hoặc <b>owner</b> / <b>0987654321</b>) – mật khẩu
+                <b>admin123</b><br>
+                • User: <b>user@foxstore.com</b> (hoặc <b>user</b>) – mật khẩu <b>user123</b><br>
+                • Shipper: <b>shipper@foxstore.com</b> (hoặc <b>shipper</b>) – mật khẩu <b>shipper123</b>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">Đăng nhập</button>
+                <button class="auth-tab" data-tab="register" onclick="switchTab('register')">Đăng ký</button>
+                <button class="auth-tab" data-tab="forgot" onclick="switchTab('forgot')">Quên mật khẩu</button>
+            </div>
+
+            <!-- LOGIN -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email / SĐT / Username</label>
+                    <input type="text" class="form-control" id="loginEmail"
+                        placeholder="VD: user hoặc contact@foxstore.com">
+                    <div class="error-msg" id="loginEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="••••••">
+                        <button type="button" class="pw-toggle" onclick="togglePw('loginPassword', this)"
+                            title="Hiện mật khẩu">👁️</button>
+                    </div>
+                    <div class="error-msg" id="loginPasswordError"></div>
+                </div>
+                <button type="submit" class="btn" style="width:100%">Đăng nhập</button>
+            </form>
+
+            <!-- REGISTER -->
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Họ tên</label>
+                    <input type="text" class="form-control" id="regName" placeholder="Nguyễn Văn A">
+                    <div class="error-msg" id="regNameError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" class="form-control" id="regEmail" placeholder="you@example.com">
+                    <div class="error-msg" id="regEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" class="form-control" id="regPhone" placeholder="0901234567">
+                    <div class="error-msg" id="regPhoneError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="regPassword" placeholder="Tối thiểu 6 ký tự">
+                        <button type="button" class="pw-toggle" onclick="togglePw('regPassword', this)"
+                            title="Hiện mật khẩu">👁️</button>
+                    </div>
+                    <div class="error-msg" id="regPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Nhập lại mật khẩu</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="regPassword2" placeholder="Nhập lại">
+                        <button type="button" class="pw-toggle" onclick="togglePw('regPassword2', this)"
+                            title="Hiện mật khẩu">👁️</button>
+                    </div>
+                    <div class="error-msg" id="regPassword2Error"></div>
+                </div>
+
+                <div class="checkbox-wrap">
+                    <input type="checkbox" id="regShipper">
+                    <label for="regShipper">
+                        🚚 <b>Đăng ký làm Shipper Fox Store</b><br>
+                        Tick để gửi yêu cầu làm shipper. Admin sẽ duyệt.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn" style="width:100%;margin-top:16px">Đăng ký</button>
+            </form>
+
+            <!-- FORGOT -->
+            <form class="auth-form" id="forgotForm" onsubmit="handleForgot(event)">
+                <p style="color:var(--muted);font-size:14px;margin-bottom:16px">
+                    Nhập đúng <b style="color:var(--accent)">Họ tên + Email + SĐT</b> đã đăng ký để đổi mật khẩu.
+                </p>
+                <div class="form-group">
+                    <label>Họ tên</label>
+                    <input type="text" class="form-control" id="forgotName" placeholder="Nguyễn Văn A">
+                    <div class="error-msg" id="forgotNameError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" class="form-control" id="forgotEmail" placeholder="you@example.com">
+                    <div class="error-msg" id="forgotEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" class="form-control" id="forgotPhone" placeholder="0901234567">
+                    <div class="error-msg" id="forgotPhoneError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu mới</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="forgotNewPw" placeholder="Tối thiểu 6 ký tự">
+                        <button type="button" class="pw-toggle" onclick="togglePw('forgotNewPw', this)"
+                            title="Hiện mật khẩu">👁️</button>
+                    </div>
+                    <div class="error-msg" id="forgotNewPwError"></div>
+                </div>
+                <div class="form-group">
+                    <label>Nhập lại mật khẩu mới</label>
+                    <div class="pw-wrap">
+                        <input type="password" class="form-control" id="forgotNewPw2" placeholder="Nhập lại">
+                        <button type="button" class="pw-toggle" onclick="togglePw('forgotNewPw2', this)"
+                            title="Hiện mật khẩu">👁️</button>
+                    </div>
+                    <div class="error-msg" id="forgotNewPw2Error"></div>
+                </div>
+                <button type="submit" class="btn" style="width:100%">🔐 Đổi mật khẩu</button>
+            </form>
+        </div>
+    </div>
+    <div id="footer"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            injectLayout("");
+            const u = getCurrentUser();
+            if (u) {
+                if (u.role === "admin") location.href = "admin.html";
+                else if (u.shipperStatus === "approved") location.href = "shipper.html";
+                else location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+
+</html>

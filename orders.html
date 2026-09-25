@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đơn hàng của tôi – Fox Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="header"></div>
+  <div class="container">
+    <h1 class="section-title" style="margin-bottom:24px">📦 Lịch sử đơn hàng</h1>
+    <div id="ordersList"></div>
+  </div>
+  <div id="footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/orders.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/reviews.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/slider.js"></script>
+  <script src="js/countdown.js"></script>
+  <script src="js/geo.js"></script>
+  <script src="js/validate.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/compare.js"></script>
+  <script src="js/layout.js"></script>
+  <script>
+    const me = getCurrentUser();
+
+    function renderOrdersPage() {
+      const box = document.getElementById("ordersList");
+      const orders = getOrders();
+
+      if (!orders.length) {
+        box.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3 style="color:var(--text);margin-bottom:8px">Chưa có đơn hàng nào</h3><p><a href="category.html" style="color:var(--accent)">Mua sắm ngay →</a></p></div>`;
+        return;
+      }
+
+      box.innerHTML = orders.map(o => {
+        const currentIdx = STATUS_FLOW.indexOf(o.status);
+        const cancelled = o.status === "cancelled";
+
+        const timeline = STATUS_FLOW.map((s, idx) => {
+          const st = ORDER_STATUS[s];
+          const isDone = !cancelled && idx <= currentIdx;
+          const isActive = !cancelled && idx === currentIdx;
+          return `
+        <div class="timeline-step ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}">
+          <div class="timeline-dot">${st.icon}</div>
+          <div class="timeline-label">${st.label}</div>
+        </div>`;
+        }).join("");
+
+        const cancelTimeline = cancelled ? `<div class="timeline-step cancelled done" style="flex:1"><div class="timeline-dot">❌</div><div class="timeline-label">Đã hủy</div></div>` : "";
+        const st = ORDER_STATUS[o.status];
+
+        // ═══ ĐÁNH GIÁ ═══
+        let reviewSection = "";
+        if (o.status === "delivered") {
+          reviewSection = renderReviewSection(o);
+        }
+
+        return `
+      <div class="order-card">
+        <div class="order-head">
+          <div>
+            <div class="order-id">#${o.id}</div>
+            <div class="order-date">📅 ${formatDate(o.createdAt)}</div>
+          </div>
+          <span class="tag" style="background:${st.color};color:#000;padding:6px 14px;font-size:12px">${st.icon} ${st.label}</span>
+        </div>
+        <div class="order-timeline">${timeline}${cancelTimeline}</div>
+
+        ${o.shipperEmail ? `
+          <div style="background:rgba(0,168,255,.08);border:1px solid #00a8ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px">
+            🚚 <b style="color:#00a8ff">Shipper:</b> ${getUsers().find(u => u.email === o.shipperEmail)?.name || o.shipperEmail}
+            ${o.shipperEmail ? ` – 📞 ${getUsers().find(u => u.email === o.shipperEmail)?.phone || ""}` : ""}
+          </div>` : ""}
+
+        <div style="background:var(--bg-2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:var(--muted)">
+          📍 <b style="color:var(--text)">${o.address.name}</b> – ${o.address.phone}<br>
+          ${formatAddress(o.address)}
+        </div>
+
+        <div class="order-items">
+          ${o.items.map(i => `
+            <div class="order-item">
+              <img src="${i.image}" alt="">
+              <div style="flex:1">
+                <div style="font-weight:600;font-size:14px">${i.name}</div>
+                <div style="color:var(--muted);font-size:13px">${fmt(i.price)} × ${i.qty}</div>
+              </div>
+              <div style="color:var(--accent);font-weight:700">${fmt(i.price * i.qty)}</div>
+            </div>`).join("")}
+        </div>
+
+        <div class="order-total">
+          <span>Tổng cộng (${o.items.reduce((s, i) => s + i.qty, 0)} sản phẩm)</span>
+          <span>${fmt(o.total)}</span>
+        </div>
+
+        ${reviewSection}
+      </div>`;
+      }).join("");
+    }
+
+    /* ═══ FORM ĐÁNH GIÁ SAU KHI GIAO ═══ */
+    function renderReviewSection(o) {
+      const items = o.items.map(it => {
+        const existing = getReviewByOrderProduct(o.id, it.id);
+        if (existing) {
+          return `
+        <div class="review-done">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px">${it.name}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${starsDisplay(existing.stars, 18)}
+            <b style="color:#ffb020">${existing.stars}/5</b>
+            <span style="color:var(--muted);font-size:12px">✅ Đã đánh giá</span>
+          </div>
+          ${existing.comment ? `<p style="color:var(--muted);font-size:13px;font-style:italic;margin-top:6px">"${existing.comment}"</p>` : ""}
+        </div>`;
+        }
+        return `
+      <div class="review-form-item">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">${it.name}</div>
+        ${starPickerHTML(`prod_${o.id}_${it.id}`, 0)}
+        <textarea class="form-control" id="prodCmt_${o.id}_${it.id}" rows="2" placeholder="Nhận xét sản phẩm (không bắt buộc)..." style="margin-top:10px;font-size:13px"></textarea>
+        <button class="btn btn-sm btn-cart" style="margin-top:8px;padding:8px 16px" onclick="submitProductReview('${o.id}', ${it.id})">📤 Gửi đánh giá sản phẩm</button>
+      </div>`;
+      }).join("");
+
+      // Shipper review
+      let shipperSection = "";
+      if (o.shipperEmail) {
+        const existingShip = getShipperReviewByOrder(o.id);
+        const shipper = getUsers().find(u => u.email === o.shipperEmail);
+        if (existingShip) {
+          shipperSection = `
+        <div class="review-done">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px">🚚 ${shipper?.name || o.shipperEmail}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${starsDisplay(existingShip.stars, 18)}
+            <b style="color:#ffb020">${existingShip.stars}/5</b>
+            <span style="color:var(--muted);font-size:12px">✅ Đã đánh giá</span>
+          </div>
+          ${existingShip.comment ? `<p style="color:var(--muted);font-size:13px;font-style:italic;margin-top:6px">"${existingShip.comment}"</p>` : ""}
+        </div>`;
+        } else {
+          shipperSection = `
+        <div class="review-form-item">
+          <div style="font-weight:600;font-size:13px;margin-bottom:10px">🚚 Shipper: ${shipper?.name || o.shipperEmail} – 📞 ${shipper?.phone || ""}</div>
+          ${starPickerHTML(`ship_${o.id}`, 0)}
+          <textarea class="form-control" id="shipCmt_${o.id}" rows="2" placeholder="Nhận xét shipper (không bắt buộc)..." style="margin-top:10px;font-size:13px"></textarea>
+          <button class="btn btn-sm btn-cart" style="margin-top:8px;padding:8px 16px;background:#00a8ff;color:#000" onclick="submitShipperReview('${o.id}', '${o.shipperEmail}')">📤 Gửi đánh giá shipper</button>
+        </div>`;
+        }
+      }
+
+      return `
+    <div class="review-section">
+      <h4 style="color:var(--accent);margin-bottom:16px;font-size:16px;display:flex;align-items:center;gap:8px">
+        ⭐ Đánh giá đơn hàng
+      </h4>
+      <div style="margin-bottom:20px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text)">📦 Sản phẩm:</div>
+        ${items}
+      </div>
+      ${shipperSection ? `
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text)">🚚 Người giao hàng:</div>
+          ${shipperSection}
+        </div>` : ""}
+    </div>`;
+    }
+
+    function submitProductReview(orderId, productId) {
+      const stars = getStarValue(`prod_${orderId}_${productId}`);
+      if (!stars) return showToast("❌ Vui lòng chọn số sao!");
+      const cmt = document.getElementById(`prodCmt_${orderId}_${productId}`).value;
+      addReview(orderId, productId, me.email, me.name, stars, cmt);
+      showToast("✅ Đã gửi đánh giá sản phẩm!");
+      renderOrdersPage();
+    }
+
+    function submitShipperReview(orderId, shipperEmail) {
+      const stars = getStarValue(`ship_${orderId}`);
+      if (!stars) return showToast("❌ Vui lòng chọn số sao!");
+      const cmt = document.getElementById(`shipCmt_${orderId}`).value;
+      addShipperReview(orderId, shipperEmail, me.email, me.name, stars, cmt);
+      showToast("✅ Đã gửi đánh giá shipper!");
+      renderOrdersPage();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!requireUser(true)) return;
+      injectLayout("orders");
+      renderOrdersPage();
+    });
+  </script>
+</body>
+
+</html>

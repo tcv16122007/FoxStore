@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1 class="section-title" style="margin-bottom:4px">⚙️ Admin Panel</h1>
+                <p style="color:var(--muted);font-size:14px">Quản trị sản phẩm, đơn hàng, shipper, phân tích và thông
+                    báo.</p>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="active" data-tab="products" onclick="switchAdminTab('products')">📦 Sản phẩm</button>
+            <button data-tab="orders" onclick="switchAdminTab('orders')">📋 Đơn hàng</button>
+            <button data-tab="shippers" onclick="switchAdminTab('shippers')">🚚 Shipper</button>
+            <button data-tab="analytics" onclick="switchAdminTab('analytics')">📊 Phân tích</button>
+            <button data-tab="reviews" onclick="switchAdminTab('reviews')">⭐ Đánh giá</button>
+            <button data-tab="broadcasts" onclick="switchAdminTab('broadcasts')">📢 Thông báo</button>
+        </div>
+
+        <!-- ═══ TAB PRODUCTS ═══ -->
+        <div id="tabProducts">
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+                <button class="btn btn-reindex" onclick="reindexIDs()">🔢 Đánh lại ID</button>
+                <button class="btn btn-export" onclick="exportDataJS()">📋 Xuất code data.js</button>
+                <button class="btn" onclick="openAdd()">➕ Thêm sản phẩm</button>
+            </div>
+
+            <div class="admin-sort-bar">
+                <label>🔽 Sắp xếp theo:</label>
+                <select id="adminSortField" onchange="changeAdminSort()">
+                    <option value="id">ID</option>
+                    <option value="name">Tên sản phẩm</option>
+                    <option value="price">Giá</option>
+                    <option value="stock">Kho</option>
+                    <option value="group">Nhóm</option>
+                    <option value="rating">Đánh giá sao</option>
+                </select>
+                <select id="adminSortDir" onchange="changeAdminSort()">
+                    <option value="asc">Tăng dần ↑</option>
+                    <option value="desc">Giảm dần ↓</option>
+                </select>
+            </div>
+
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <div class="label">Tổng sản phẩm</div>
+                    <div class="value" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Sản phẩm mới</div>
+                    <div class="value" id="statNew">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Sản phẩm hot</div>
+                    <div class="value" id="statHot">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Khuyến mãi</div>
+                    <div class="value" id="statSale">0</div>
+                </div>
+            </div>
+
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ảnh</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Nhóm</th>
+                            <th>Kho</th>
+                            <th>⭐</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ TAB ORDERS ═══ -->
+        <div id="tabOrders" style="display:none">
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách</th>
+                            <th>Sản phẩm</th>
+                            <th>Địa chỉ</th>
+                            <th>Shipper</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày đặt</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOrdersTbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ TAB SHIPPERS ═══ -->
+        <div id="tabShippers" style="display:none">
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên</th>
+                            <th>Email</th>
+                            <th>SĐT</th>
+                            <th>Đánh giá</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminShippersTbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══ TAB ANALYTICS ═══ -->
+        <div id="tabAnalytics" style="display:none">
+            <div id="analyticsContent"></div>
+        </div>
+
+        <!-- ═══ TAB REVIEWS ═══ -->
+        <div id="tabReviews" style="display:none">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+                <button class="btn" style="background:linear-gradient(135deg,#00a8ff,#0090e0);color:#000"
+                    onclick="exportReviewsJS()">📋 Xuất code đánh giá</button>
+            </div>
+            <div id="reviewsContent"></div>
+        </div>
+
+        <!-- ═══ TAB BROADCASTS ═══ -->
+        <div id="tabBroadcasts" style="display:none">
+            <div id="broadcastContent"></div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <!-- ═══ MODAL ADD/EDIT PRODUCT ═══ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitle">Thêm sản phẩm <button class="modal-close" onclick="closeModal()">×</button></h3>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>Tên sản phẩm *</label>
+                    <input type="text" class="form-control" id="fName" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Giá bán (₫) *</label>
+                        <input type="number" class="form-control" id="fPrice" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Giá gốc (₫) – 0 nếu không giảm</label>
+                        <input type="number" class="form-control" id="fOldPrice" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🖼️ Hình ảnh (4 ảnh) – Ảnh 1 là ảnh chính *</label>
+                    <div class="img-grid">
+                        <div class="img-item">
+                            <div class="lbl">Ảnh 1 *</div>
+                            <input type="text" id="fImage1" placeholder="https://...">
+                            <img id="prevImg1" alt="">
+                        </div>
+                        <div class="img-item">
+                            <div class="lbl">Ảnh 2</div>
+                            <input type="text" id="fImage2" placeholder="https://...">
+                            <img id="prevImg2" alt="">
+                        </div>
+                        <div class="img-item">
+                            <div class="lbl">Ảnh 3</div>
+                            <input type="text" id="fImage3" placeholder="https://...">
+                            <img id="prevImg3" alt="">
+                        </div>
+                        <div class="img-item">
+                            <div class="lbl">Ảnh 4</div>
+                            <input type="text" id="fImage4" placeholder="https://...">
+                            <img id="prevImg4" alt="">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Danh mục</label>
+                        <select class="form-control" id="fCategory"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nhóm</label>
+                        <select class="form-control" id="fGroup">
+                            <option value="new">🆕 Sản phẩm mới</option>
+                            <option value="hot">🔥 Sản phẩm hot</option>
+                            <option value="sale">💥 Khuyến mãi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Thương hiệu *</label>
+                        <input type="text" class="form-control" id="fBrand" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng kho (0 = Hết hàng)</label>
+                        <input type="number" class="form-control" id="fStock" min="0" value="10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>YouTube Video ID (không bắt buộc)</label>
+                    <input type="text" class="form-control" id="fVideoId" placeholder="VD: dQw4w9WgXcQ">
+                </div>
+
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea class="form-control" id="fDesc" rows="3"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn">💾 Lưu sản phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL EXPORT DATA.JS ═══ -->
+    <div class="modal-overlay" id="exportOverlay">
+        <div class="modal" style="max-width:900px">
+            <h3>📋 Xuất code data.js <button class="modal-close" onclick="closeExport()">×</button></h3>
+            <div class="export-hint">
+                <b>Hướng dẫn:</b> 1. Bấm <b>📋 Copy</b> → 2. Mở <code>js/data.js</code> → 3. Tìm
+                <code>const DEFAULT_PRODUCTS = [...]</code> → 4. Paste → 5. Ctrl+S
+            </div>
+            <textarea id="exportCode" readonly spellcheck="false"></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeExport()">Đóng</button>
+                <button class="btn btn-export" onclick="copyExportCode()">📋 Copy toàn bộ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL EXPORT REVIEWS ═══ -->
+    <div class="modal-overlay" id="reviewExportOverlay">
+        <div class="modal" style="max-width:900px">
+            <h3>📋 Xuất code đánh giá <button class="modal-close" onclick="closeReviewExport()">×</button></h3>
+            <div class="export-hint">
+                <b>Hướng dẫn:</b> 1. Bấm <b>📋 Copy</b> → 2. Mở <code>js/data.js</code> → 3. Thêm biến
+                <code>DEFAULT_REVIEWS</code> và <code>DEFAULT_SHIPPER_REVIEWS</code> → 4. Ctrl+S
+            </div>
+            <textarea id="reviewExportCode" readonly spellcheck="false"></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeReviewExport()">Đóng</button>
+                <button class="btn" style="background:linear-gradient(135deg,#00a8ff,#0090e0);color:#000"
+                    onclick="copyReviewExport()">📋 Copy toàn bộ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!requireAdmin()) return;
+            injectAdminLayout();
+        });
+    </script>
+</body>
+
+</html>

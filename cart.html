@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng – Fox Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container">
+        <h1 class="section-title" style="margin-bottom:24px">🛒 Giỏ hàng của bạn</h1>
+
+        <div class="guest-notice" id="guestNotice" style="display:none">
+            🔐 Bạn đang là <b>Khách</b>. Để thanh toán, vui lòng
+            <a href="login.html" onclick="sessionStorage.setItem('fox_redirect','cart.html')">đăng nhập / đăng ký</a>.
+        </div>
+
+        <div id="cartList"></div>
+
+        <div class="cart-summary" id="cartSummary" style="display:none">
+            <div class="summary-row"><span>Tạm tính</span><span id="subtotal">0₫</span></div>
+            <div class="summary-row"><span>Phí vận chuyển</span><span style="color:var(--success)">Miễn phí</span></div>
+            <div class="summary-row total"><span>Tổng cộng</span><span id="total">0₫</span></div>
+            <button class="btn" style="width:100%;margin-top:20px" onclick="openCheckout()">✅ Tiến hành thanh
+                toán</button>
+        </div>
+    </div>
+    <div id="footer"></div>
+
+    <!-- MODAL CHECKOUT -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal">
+            <h3>📦 Thông tin giao hàng <button class="modal-close"
+                    onclick="document.getElementById('checkoutModal').classList.remove('show')">×</button></h3>
+            <form onsubmit="handleCheckoutSubmit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Họ tên người nhận *</label>
+                        <input type="text" class="form-control" id="ckName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại *</label>
+                        <input type="text" class="form-control" id="ckPhone" placeholder="0912345678" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="ckEmail" readonly style="opacity:.7">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Thành phố *</label>
+                        <select class="form-control" id="ckCity" onchange="onCityChange()" required>
+                            <option value="">-- Chọn thành phố --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quận / Huyện *</label>
+                        <select class="form-control" id="ckDistrict" required>
+                            <option value="">-- Chọn quận/huyện --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ chi tiết *</label>
+                    <input type="text" class="form-control" id="ckDetail" placeholder="Số nhà, tên đường..." required>
+                </div>
+                <button type="button" class="btn btn-outline" style="width:100%;margin-bottom:12px"
+                    onclick="fillAddressByGeo()">
+                    📍 Tự động chọn theo vị trí của tôi
+                </button>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline"
+                        onclick="document.getElementById('checkoutModal').classList.remove('show')">Hủy</button>
+                    <button type="submit" class="btn">💾 Xác nhận đặt hàng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/slider.js"></script>
+    <script src="js/countdown.js"></script>
+    <script src="js/geo.js"></script>
+    <script src="js/validate.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/compare.js"></script>
+    <script src="js/layout.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            injectLayout("cart");
+            renderCartPage();
+        });
+    </script>
+</body>
+
+</html>
