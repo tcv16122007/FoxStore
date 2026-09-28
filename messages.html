@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tin nhắn – Fox Store</title>
+    <title>Tin nhắn - Fox Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -35,10 +35,9 @@
     </div>
     <div id="footer"></div>
 
-    <!-- MODAL EXPORT CHAT -->
     <div class="modal-overlay" id="chatExportOverlay">
         <div class="modal" style="max-width:900px">
-            <h3>📋 Xuất code chat <button class="modal-close" onclick="closeChatExport()">×</button></h3>
+            <h3>📋 Xuất code chat <button class="modal-close" onclick="closeChatExport()">x</button></h3>
             <div class="export-hint"
                 style="background:rgba(0,168,255,.08);border-left:3px solid #00a8ff;padding:12px 16px;border-radius:8px;font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
                 <b style="color:#00a8ff">Hướng dẫn:</b> 1. Bấm <b>📋 Copy</b> → 2. Mở <code>js/data.js</code> → 3. Thay
@@ -200,12 +199,10 @@
         document.addEventListener("DOMContentLoaded", () => {
             if (!requireUser(true)) return;
 
-            // Inject layout theo role
             if (isAdmin()) injectAdminLayout();
             else if (isShipper()) injectShipperLayout();
             else injectLayout("");
 
-            // Admin có nút export chat
             if (isAdmin()) {
                 document.getElementById("adminTools").innerHTML = `
       <button class="btn" style="background:linear-gradient(135deg,#00a8ff,#0090e0);color:#000" onclick="exportChatJS()">
@@ -215,7 +212,6 @@
 
             renderContacts();
 
-            // Auto open nếu ?contact=email
             const params = new URLSearchParams(location.search);
             const autoOpen = params.get("contact");
             if (autoOpen && autoOpen !== me.email) {
@@ -223,7 +219,6 @@
                 if (exists) openChat(autoOpen);
             }
 
-            // Auto refresh 3s
             setInterval(() => {
                 if (selectedEmail) {
                     const msgs = getRoomMessages(me.email, selectedEmail);

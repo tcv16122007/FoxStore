@@ -1,4 +1,3 @@
-// js/auth.js
 const USER_KEY = "fox_users";
 const CURRENT_KEY = "fox_current";
 const REDIRECT_KEY = "fox_redirect";
@@ -15,12 +14,11 @@ function isPendingShipper() { return getCurrentUser()?.shipperStatus === "pendin
 function isGuest() { return !getCurrentUser(); }
 function isOwner() { return isAdmin(); }
 
-/* ═══ ĐĂNG KÝ ═══ */
 function register(name, email, phone, password, wantShipper = false) {
     const users = getUsers();
     email = String(email || "").trim();
     phone = String(phone || "").trim();
-    password = String(password || "").trim();   // ✅ Trim password
+    password = String(password || "").trim();
 
     if (users.find(u => u.email === email)) return { ok: false, msg: "Email đã tồn tại!" };
     if (users.find(u => u.phone === phone)) return { ok: false, msg: "SĐT đã được sử dụng!" };
@@ -42,12 +40,11 @@ function register(name, email, phone, password, wantShipper = false) {
     };
 }
 
-/* ═══ ĐĂNG NHẬP — hỗ trợ email / phone / username ═══ */
 function login(identifier, password) {
     const users = getUsers();
     const raw = String(identifier || "").trim();
     const idf = raw.toLowerCase();
-    const pwClean = String(password || "").trim();   // ✅ Trim password
+    const pwClean = String(password || "").trim();
 
     const u = users.find(u => {
         const matchEmail = u.email && u.email.toLowerCase() === idf;
@@ -66,7 +63,6 @@ function login(identifier, password) {
     };
 }
 
-/* ═══ QUÊN MẬT KHẨU ═══ */
 function resetPassword(name, email, phone, newPw) {
     const users = getUsers();
     const u = users.find(u =>
@@ -75,7 +71,7 @@ function resetPassword(name, email, phone, newPw) {
         u.phone === String(phone).trim()
     );
     if (!u) return { ok: false, msg: "Thông tin không khớp tài khoản nào!" };
-    u.password = String(newPw).trim();   // ✅ Trim
+    u.password = String(newPw).trim();
     saveUsers(users);
     return { ok: true, msg: "Đổi mật khẩu thành công! Vui lòng đăng nhập lại." };
 }
@@ -85,7 +81,6 @@ function logout() {
     location.href = "index.html";
 }
 
-/* ═══ DUYỆT SHIPPER ═══ */
 function approveShipper(email) {
     if (!isAdmin()) return false;
     const users = getUsers();
@@ -107,7 +102,6 @@ function rejectShipper(email) {
 function getPendingShippers() { return getUsers().filter(u => u.shipperStatus === "pending"); }
 function getAllShippers() { return getUsers().filter(u => u.shipperStatus === "approved"); }
 
-/* ═══ GUARDS ═══ */
 function requireAdmin() {
     if (!isAdmin()) { alert("Bạn không có quyền truy cập!"); location.href = "login.html"; return false; }
     return true;
@@ -135,7 +129,6 @@ function redirectAfterLogin() {
     return false;
 }
 
-/* ═══ TOGGLE PASSWORD ═══ */
 function togglePw(inputId, btn) {
     const input = document.getElementById(inputId);
     if (!input) return;

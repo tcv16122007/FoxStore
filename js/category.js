@@ -79,13 +79,12 @@ function resetFilter() {
 function filterAndRender() {
     let list = [...getProducts()];
 
-    // Group filter (đặc biệt cho "out")
     if (currentFilter.group === "out") {
         list = list.filter(p => p.stock === 0);
     } else if (currentFilter.group) {
         list = list.filter(p => p.group === currentFilter.group && p.stock > 0);
     } else {
-        list = list.filter(p => p.stock > 0); // Mặc định ẩn hết hàng
+        list = list.filter(p => p.stock > 0);
     }
 
     if (currentFilter.category) list = list.filter(p => p.category === currentFilter.category);
@@ -124,7 +123,7 @@ function renderActiveChips() {
     if (currentFilter.priceMin > 0 || currentFilter.priceMax !== Infinity) {
         const minTxt = currentFilter.priceMin > 0 ? fmt(currentFilter.priceMin) : "0₫";
         const maxTxt = currentFilter.priceMax !== Infinity ? fmt(currentFilter.priceMax) : "∞";
-        chips.push({ label: `${minTxt} – ${maxTxt}`, action: "clearPrice()" });
+        chips.push({ label: `${minTxt} - ${maxTxt}`, action: "clearPrice()" });
     }
     box.innerHTML = chips.map(c => `<span class="chip" onclick="${c.action}">${c.label} ✕</span>`).join("");
 }

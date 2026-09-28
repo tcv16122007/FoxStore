@@ -1,14 +1,11 @@
-// js/product.js
 let currentProduct = null;
 let currentQty = 1;
 let ytPlayer = null;
 
-/* ═══ URL PARAMS ═══ */
 function getIdFromURL() {
   return parseInt(new URLSearchParams(location.search).get("id"));
 }
 
-/* ═══ RENDER CHI TIẾT SẢN PHẨM ═══ */
 function renderProductDetail() {
   const id = getIdFromURL();
   const p = getProductById(id);
@@ -25,7 +22,7 @@ function renderProductDetail() {
   }
 
   currentProduct = p;
-  document.title = p.name + " – Fox Store";
+  document.title = p.name + " - Fox Store";
   if (typeof addToViewed === "function") addToViewed(p.id);
 
   const badgeMap = { new: "Sản phẩm mới", hot: "Bán chạy", sale: "Khuyến mãi" };
@@ -34,7 +31,6 @@ function renderProductDetail() {
   const catName = getCategories().find(c => c.slug === p.category)?.name || "Sản phẩm";
   const videoId = p.videoId || "";
 
-  // Lấy 4 ảnh từ p.images
   let thumbs = (p.images && p.images.length) ? p.images : [p.image];
   while (thumbs.length < 4) thumbs.push(thumbs[0]);
 
@@ -182,32 +178,27 @@ function renderProductDetail() {
   if (videoId) initYouTube(videoId);
 }
 
-/* ═══ ĐỔI ẢNH THUMB ═══ */
 function switchThumb(el, src) {
   document.getElementById("mainImg").src = src;
   document.querySelectorAll(".detail-thumb").forEach(t => t.classList.remove("active"));
   el.classList.add("active");
 }
 
-/* ═══ SỐ LƯỢNG ═══ */
 function changeQtyDetail(delta) {
   currentQty = Math.max(1, currentQty + delta);
   document.getElementById("detailQty").textContent = currentQty;
 }
 
-/* ═══ THÊM GIỎ ═══ */
 function handleAddCart() {
   if (currentProduct) addToCart(currentProduct.id, currentQty);
 }
 
-/* ═══ MUA NGAY ═══ */
 function handleBuyNow() {
   if (!currentProduct) return;
   addToCart(currentProduct.id, currentQty);
   setTimeout(() => location.href = "cart.html", 400);
 }
 
-/* ═══ TAB ═══ */
 function switchTabDetail(btn, panelId) {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
@@ -215,7 +206,6 @@ function switchTabDetail(btn, panelId) {
   document.getElementById(panelId).classList.add("active");
 }
 
-/* ═══ SẢN PHẨM LIÊN QUAN ═══ */
 function renderRelated(p) {
   const list = getProducts().filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
   const box = document.getElementById("gridRelated");
@@ -226,9 +216,6 @@ function renderRelated(p) {
   box.innerHTML = list.map(productCardHTML).join("");
 }
 
-/* ═══════════════════════════════════════════════════
-   YOUTUBE API
-   ═══════════════════════════════════════════════════ */
 function initYouTube(videoId) {
   function createPlayer() {
     ytPlayer = new YT.Player("ytPlayer", {
@@ -255,7 +242,6 @@ function initYouTube(videoId) {
   else window.onYouTubeIframeAPIReady = createPlayer;
 }
 
-/* ═══ ĐIỀU KHIỂN PLAYER ═══ */
 function playerAction(action) {
   if (!ytPlayer || !ytPlayer.getPlayerState) return;
 
@@ -276,7 +262,6 @@ function playerAction(action) {
       break;
 
     case "rewind": {
-      // ⏪ Tua ngược 10 giây
       const current = ytPlayer.getCurrentTime() || 0;
       const target = Math.max(0, current - 10);
       ytPlayer.seekTo(target, true);
@@ -285,7 +270,6 @@ function playerAction(action) {
     }
 
     case "forward": {
-      // ⏩ Tua tới 10 giây
       const current = ytPlayer.getCurrentTime() || 0;
       const duration = ytPlayer.getDuration() || 0;
       const target = Math.min(duration, current + 10);
@@ -313,7 +297,6 @@ function playerAction(action) {
   }
 }
 
-/* ═══ ÂM LƯỢNG ═══ */
 function setVolume(val) {
   if (!ytPlayer || !ytPlayer.setVolume) return;
   const v = Number(val);
@@ -329,7 +312,6 @@ function setVolume(val) {
   }
 }
 
-/* ═══ PHỤ ĐỀ (CC) ═══ */
 function toggleCC(enabled) {
   if (!ytPlayer || !ytPlayer.loadModule) return;
   if (enabled) {
@@ -343,7 +325,6 @@ function toggleCC(enabled) {
   }
 }
 
-/* ═══ TOÀN MÀN HÌNH ═══ */
 function toggleFullscreen() {
   if (!ytPlayer || !ytPlayer.getIframe) return;
   const iframe = ytPlayer.getIframe();
@@ -369,7 +350,6 @@ function setActiveBtn(id) {
   if (id) document.getElementById(id)?.classList.add("active");
 }
 
-/* ═══ INIT ═══ */
 document.addEventListener("DOMContentLoaded", () => {
   injectLayout("category");
   renderProductDetail();

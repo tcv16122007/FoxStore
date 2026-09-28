@@ -1,8 +1,6 @@
-// js/reviews.js
 const REVIEW_KEY = "fox_reviews";
 const SHIP_REVIEW_KEY = "fox_shipper_reviews";
 
-/* ═══ PRODUCT REVIEWS ═══ */
 function getReviews() { return JSON.parse(localStorage.getItem(REVIEW_KEY)) || []; }
 function saveReviews(list) { localStorage.setItem(REVIEW_KEY, JSON.stringify(list)); }
 
@@ -33,7 +31,6 @@ function getProductReviewCount(productId) {
     return getProductReviews(productId).length;
 }
 
-/* ═══ SHIPPER REVIEWS ═══ */
 function getShipperReviews() { return JSON.parse(localStorage.getItem(SHIP_REVIEW_KEY)) || []; }
 function saveShipperReviews(list) { localStorage.setItem(SHIP_REVIEW_KEY, JSON.stringify(list)); }
 
@@ -60,7 +57,6 @@ function getShipperReviewCount(email) {
     return getShipperReviews().filter(r => r.shipperEmail === email).length;
 }
 
-/* ═══ STAR HELPERS ═══ */
 function starsDisplay(stars, size = 16) {
     const full = Math.floor(stars);
     const hasHalf = stars - full >= 0.25 && stars - full < 0.75;
@@ -102,7 +98,6 @@ function getStarValue(name) {
     return picker ? Number(picker.dataset.value) : 0;
 }
 
-/* ═══ EXPORT CHO ADMIN ═══ */
 function exportReviewsJS() {
     const reviews = getReviews();
     const shipReviews = getShipperReviews();

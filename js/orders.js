@@ -18,12 +18,10 @@ function getOrders() {
 }
 function saveOrders(list) { localStorage.setItem(ORDER_KEY, JSON.stringify(list)); }
 
-/* ═══ TRỪ KHO KHI ĐẶT HÀNG ═══ */
 function createOrder(items, total, address) {
     const user = getCurrentUser();
     if (!user) return null;
 
-    // Kiểm tra kho
     const products = getProducts();
     for (const it of items) {
         const p = products.find(x => x.id === it.id);
@@ -31,14 +29,12 @@ function createOrder(items, total, address) {
         if (p.stock < it.qty) return { error: `"${p.name}" chỉ còn ${p.stock} sản phẩm!` };
     }
 
-    // Trừ kho
     items.forEach(it => {
         const p = products.find(x => x.id === it.id);
         if (p) p.stock -= it.qty;
     });
     saveProducts(products);
 
-    // Tạo đơn
     const all = JSON.parse(localStorage.getItem(ORDER_KEY)) || [];
     const order = {
         id: "FOX" + Date.now().toString().slice(-8),
@@ -57,7 +53,6 @@ function createOrder(items, total, address) {
     return order;
 }
 
-/* ═══ ĐỔI TRẠNG THÁI + CỘNG KHO KHI HỦY ═══ */
 function updateOrderStatus(orderId, status) {
     const user = getCurrentUser();
     if (!user) return false;
@@ -72,7 +67,6 @@ function updateOrderStatus(orderId, status) {
         if (status !== "delivered") return false;
     }
 
-    // Cộng kho lại nếu chuyển sang cancelled
     if (status === "cancelled" && o.status !== "cancelled") {
         const products = getProducts();
         o.items.forEach(it => {
@@ -81,7 +75,6 @@ function updateOrderStatus(orderId, status) {
         });
         saveProducts(products);
     }
-    // Trừ kho lại nếu từ cancelled quay về trạng thái khác
     if (o.status === "cancelled" && status !== "cancelled") {
         const products = getProducts();
         o.items.forEach(it => {
@@ -116,7 +109,6 @@ function formatAddress(addr) {
     if (!addr) return "";
     return [addr.detail, addr.district, addr.city].filter(Boolean).join(", ");
 }
-/* ═══ SHIPPER TỰ NHẬN ĐƠN ═══ */
 function shipperClaimOrder(orderId) {
     const user = getCurrentUser();
     if (!user || user.shipperStatus !== "approved") return false;
@@ -133,7 +125,6 @@ function shipperClaimOrder(orderId) {
     return true;
 }
 
-/* ═══ LẤY ĐƠN CHƯA GÁN SHIPPER ═══ */
 function getUnclaimedOrders(cityFilter = "") {
     const all = JSON.parse(localStorage.getItem(ORDER_KEY)) || [];
     let list = all.filter(o => !o.shipperEmail && o.status === "pending");

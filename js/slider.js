@@ -18,8 +18,8 @@ function renderSlider() {
       </div>
     </div>
   `).join("") + `
-    <button class="slider-btn prev" onclick="changeSlide(-1)">‹</button>
-    <button class="slider-btn next" onclick="changeSlide(1)">›</button>
+    <button class="slider-btn prev" onclick="changeSlide(-1)"><</button>
+    <button class="slider-btn next" onclick="changeSlide(1)">></button>
     <div class="slider-dots">
       ${SLIDES.map((_, i) => `<button class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`).join("")}
     </div>`;

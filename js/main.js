@@ -1,4 +1,3 @@
-/* ═══ RENDER SẢN PHẨM ═══ */
 function productCardHTML(p) {
   const badgeMap = { new: "MỚI", hot: "HOT", sale: "SALE" };
   const badgeClass = { new: "badge-new", hot: "badge-hot", sale: "badge-sale" };
@@ -73,7 +72,6 @@ function renderHomeGroups() {
   renderViewed();
 }
 
-/* ═══ TÌM KIẾM REALTIME ═══ */
 function handleSearch(e) {
   const keyword = e.target.value.toLowerCase().trim();
   const box = document.getElementById("searchResult");
@@ -105,7 +103,6 @@ document.addEventListener("click", e => {
   }
 });
 
-/* ═══ SẢN PHẨM ĐÃ XEM ═══ */
 const VIEWED_KEY = "fox_viewed";
 function addToViewed(id) {
   let list = JSON.parse(localStorage.getItem(VIEWED_KEY)) || [];
@@ -125,7 +122,6 @@ function renderViewed() {
   box.innerHTML = list.map(productCardHTML).join("");
 }
 
-/* ═══ TOAST ═══ */
 function showToast(msg) {
   let t = document.getElementById("toast");
   if (!t) {
@@ -140,7 +136,6 @@ function showToast(msg) {
   t._timer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-/* ═══ INIT ═══ */
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("slider")) renderSlider();
   if (document.getElementById("countdown")) startCountdown();

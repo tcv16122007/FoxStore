@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đơn hàng của tôi – Fox Store</title>
+  <title>Đơn hàng của tôi - Fox Store</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -60,7 +60,6 @@
         const cancelTimeline = cancelled ? `<div class="timeline-step cancelled done" style="flex:1"><div class="timeline-dot">❌</div><div class="timeline-label">Đã hủy</div></div>` : "";
         const st = ORDER_STATUS[o.status];
 
-        // ═══ ĐÁNH GIÁ ═══
         let reviewSection = "";
         if (o.status === "delivered") {
           reviewSection = renderReviewSection(o);
@@ -110,7 +109,6 @@
       }).join("");
     }
 
-    /* ═══ FORM ĐÁNH GIÁ SAU KHI GIAO ═══ */
     function renderReviewSection(o) {
       const items = o.items.map(it => {
         const existing = getReviewByOrderProduct(o.id, it.id);
@@ -135,7 +133,6 @@
       </div>`;
       }).join("");
 
-      // Shipper review
       let shipperSection = "";
       if (o.shipperEmail) {
         const existingShip = getShipperReviewByOrder(o.id);

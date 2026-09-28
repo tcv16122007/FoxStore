@@ -83,7 +83,6 @@ function renderCartPage() {
     if (totalEl) totalEl.textContent = fmt(getCartTotal());
 }
 
-/* ═══ MỞ FORM CHECKOUT ═══ */
 function openCheckout() {
     if (!getCart().length) return showToast("❌ Giỏ hàng trống!");
     if (isGuest()) {
@@ -103,7 +102,6 @@ function openCheckout() {
     }
 }
 
-/* ═══ ĐIỀN ĐỊA CHỈ ═══ */
 function fillCitySelect() {
     const sel = document.getElementById("ckCity");
     if (!sel) return;
@@ -119,19 +117,16 @@ function onCityChange() {
         CITIES[city].map(d => `<option value="${d}">${d}</option>`).join("");
 }
 
-/* ═══ ĐỊNH VỊ ĐỊA CHỈ ═══ */
 function fillAddressByGeo() {
     if (!navigator.geolocation) return showToast("❌ Trình duyệt không hỗ trợ Geolocation!");
     showToast("📍 Đang xác định vị trí...");
     navigator.geolocation.getCurrentPosition(
         pos => {
             const { latitude: lat, longitude: lng } = pos.coords;
-            // Tâm Đà Nẵng: 16.0544, 108.2022
             const distDaNang = distanceKm(lat, lng, 16.0544, 108.2022);
             if (distDaNang < 40) {
                 document.getElementById("ckCity").value = "Đà Nẵng";
                 onCityChange();
-                // Tìm quận gần nhất
                 const districts = [
                     { name: "Hải Châu", lat: 16.0544, lng: 108.2022 },
                     { name: "Thanh Khê", lat: 16.0678, lng: 108.1904 },
@@ -153,7 +148,6 @@ function fillAddressByGeo() {
     );
 }
 
-/* ═══ XỬ LÝ ĐẶT HÀNG ═══ */
 function handleCheckoutSubmit(e) {
     e.preventDefault();
     const name = document.getElementById("ckName").value.trim();

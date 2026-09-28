@@ -1,12 +1,9 @@
-// js/chat.js
 const MSG_KEY = "fox_messages";
 const BROADCAST_KEY = "fox_broadcasts";
 
-/* ═══ STORAGE ═══ */
 function getMessages() { return JSON.parse(localStorage.getItem(MSG_KEY)) || []; }
 function saveMessages(list) { localStorage.setItem(MSG_KEY, JSON.stringify(list)); }
 
-/* ═══ ROOM ═══ */
 function getRoomId(a, b) { return [a, b].sort().join("::"); }
 
 function sendMessage(from, to, text) {
@@ -49,37 +46,31 @@ function getUnreadCountFrom(email, fromEmail) {
     return getMessages().filter(m => m.to === email && m.from === fromEmail && !m.read).length;
 }
 
-/* ═══ DANH SÁCH LIÊN HỆ — CHỈ theo yêu cầu ═══ */
 function getContactsFor(email) {
     const user = getUsers().find(u => u.email === email);
     if (!user) return [];
     const contacts = [];
 
-    // 1. Owner LUÔN đầu tiên (nếu không phải chính mình)
     const admin = getUsers().find(u => u.role === "admin");
     if (admin && admin.email !== email) contacts.push(admin);
 
     if (user.role === "admin") {
-        // 2a. Admin → CHỈ shipper (không user, không bản thân)
         const shippers = getUsers().filter(u =>
             u.shipperStatus === "approved" && u.email !== email
         );
         contacts.push(...shippers);
     } else if (user.shipperStatus === "approved") {
-        // 2b. Shipper → owner (đã push) + shipper khác (không user)
         const otherShippers = getUsers().filter(u =>
             u.shipperStatus === "approved" && u.email !== email
         );
         contacts.push(...otherShippers);
     } else {
-        // 2c. User thường → owner (đã push) + shipper
         const shippers = getUsers().filter(u =>
             u.shipperStatus === "approved" && u.email !== email
         );
         contacts.push(...shippers);
     }
 
-    // Loại bỏ trùng email
     const seen = new Set();
     return contacts.filter(c => {
         if (seen.has(c.email)) return false;
@@ -93,7 +84,6 @@ function getLastMessage(a, b) {
     return list.length ? list[list.length - 1] : null;
 }
 
-/* ═══ BROADCAST ═══ */
 function getBroadcasts() { return JSON.parse(localStorage.getItem(BROADCAST_KEY)) || []; }
 function saveBroadcasts(list) { localStorage.setItem(BROADCAST_KEY, JSON.stringify(list)); }
 
@@ -118,13 +108,11 @@ function deleteBroadcast(id) {
     return true;
 }
 
-/* ═══ THÔNG BÁO ═══ */
 function getNotifications(email) {
     const notifs = [];
     const user = getUsers().find(u => u.email === email);
     if (!user) return [];
 
-    // 1. Broadcast — hiện cho tất cả (trừ admin)
     if (user.role !== "admin") {
         getBroadcasts().forEach(b => {
             notifs.push({
@@ -139,7 +127,6 @@ function getNotifications(email) {
         });
     }
 
-    // 2. Tin nhắn chưa đọc
     getMessages()
         .filter(m => m.to === email && !m.read)
         .forEach(m => {
@@ -155,7 +142,6 @@ function getNotifications(email) {
             });
         });
 
-    // 3. Đơn hàng theo vai trò
     const orders = JSON.parse(localStorage.getItem("fox_orders")) || [];
     if (user.role === "admin") {
         orders.filter(o => o.status === "pending").forEach(o => {
@@ -164,7 +150,7 @@ function getNotifications(email) {
                 type: "order",
                 icon: "📦",
                 title: `Đơn hàng mới #${o.id}`,
-                text: `Từ ${o.userName} – ${formatPriceShort(o.total)}`,
+                text: `Từ ${o.userName} - ${formatPriceShort(o.total)}`,
                 timestamp: o.createdAt,
                 link: "admin.html"
             });
@@ -176,7 +162,7 @@ function getNotifications(email) {
                 type: "order",
                 icon: "🚚",
                 title: `Đơn cần giao #${o.id}`,
-                text: `Giao cho ${o.address.name} – ${o.address.phone}`,
+                text: `Giao cho ${o.address.name} - ${o.address.phone}`,
                 timestamp: o.updatedAt,
                 link: "shipper.html"
             });
@@ -203,7 +189,6 @@ function formatPriceShort(n) {
     return Number(n).toLocaleString("vi-VN") + "₫";
 }
 
-/* ═══ BADGE — ẨN KHI = 0 ═══ */
 function updateMsgBadge() {
     const badge = document.getElementById("msgBadge");
     if (!badge) return;
@@ -231,7 +216,6 @@ function updateNotifBadge() {
     }
 }
 
-/* ═══ EXPORT ═══ */
 function exportChatJS() {
     const msgs = getMessages();
     const bcs = getBroadcasts();

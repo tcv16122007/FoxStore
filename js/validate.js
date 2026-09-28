@@ -1,6 +1,3 @@
-// js/validate.js
-
-/* ═══ HELPERS ═══ */
 function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim()); }
 function validatePhone(v) { return /^(0|\+84)\d{9,10}$/.test(String(v).replace(/\s/g, "")); }
 function validateUsername(v) { return /^[a-zA-Z0-9_]{3,30}$/.test(String(v).trim()); }
@@ -19,7 +16,6 @@ function clearError(id) {
     if (input) input.classList.remove("error");
 }
 
-/* ═══ CONTACT ═══ */
 function handleContact(e) {
     e.preventDefault();
     let ok = true;
@@ -37,11 +33,10 @@ function handleContact(e) {
     if (ok) { showToast("✅ Gửi liên hệ thành công!"); e.target.reset(); }
 }
 
-/* ═══ LOGIN — cho phép Email / SĐT / Username ═══ */
 function handleLogin(e) {
     e.preventDefault();
     const idf = document.getElementById("loginEmail").value.trim();
-    const pw = document.getElementById("loginPassword").value.trim();   // ✅ Trim password
+    const pw = document.getElementById("loginPassword").value.trim();
     ["loginEmail", "loginPassword"].forEach(clearError);
 
     if (!idf) {
@@ -49,10 +44,6 @@ function handleLogin(e) {
         return;
     }
 
-    // 3 nhánh:
-    // 1. Có @  → email
-    // 2. Toàn số → SĐT
-    // 3. Còn lại → username (bỏ qua validate)
     if (idf.includes("@")) {
         if (!validateEmail(idf)) { showError("loginEmail", "Email không hợp lệ"); return; }
     } else if (isAllDigits(idf)) {
@@ -73,14 +64,13 @@ function handleLogin(e) {
     }
 }
 
-/* ═══ REGISTER ═══ */
 function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById("regName").value.trim();
     const email = document.getElementById("regEmail").value.trim();
     const phone = document.getElementById("regPhone").value.trim();
-    const pw = document.getElementById("regPassword").value.trim();   // ✅ Trim
-    const pw2 = document.getElementById("regPassword2").value.trim();  // ✅ Trim
+    const pw = document.getElementById("regPassword").value.trim();
+    const pw2 = document.getElementById("regPassword2").value.trim();
     const wantShipper = document.getElementById("regShipper")?.checked || false;
 
     ["regName", "regEmail", "regPhone", "regPassword", "regPassword2"].forEach(clearError);
@@ -108,14 +98,13 @@ function handleRegister(e) {
     }
 }
 
-/* ═══ FORGOT ═══ */
 function handleForgot(e) {
     e.preventDefault();
     const name = document.getElementById("forgotName").value.trim();
     const email = document.getElementById("forgotEmail").value.trim();
     const phone = document.getElementById("forgotPhone").value.trim();
-    const newPw = document.getElementById("forgotNewPw").value.trim();   // ✅ Trim
-    const newPw2 = document.getElementById("forgotNewPw2").value.trim();  // ✅ Trim
+    const newPw = document.getElementById("forgotNewPw").value.trim();
+    const newPw2 = document.getElementById("forgotNewPw2").value.trim();
 
     ["forgotName", "forgotEmail", "forgotPhone", "forgotNewPw", "forgotNewPw2"].forEach(clearError);
 
@@ -132,7 +121,6 @@ function handleForgot(e) {
     if (res.ok) setTimeout(() => { switchTab("login"); e.target.reset(); }, 900);
 }
 
-/* ═══ SWITCH TAB ═══ */
 function switchTab(tab) {
     document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".auth-form").forEach(f => f.classList.remove("active"));

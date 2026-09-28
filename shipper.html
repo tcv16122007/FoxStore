@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shipper – Fox Store</title>
+    <title>Shipper - Fox Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -27,13 +27,11 @@
             <button data-tab="history" onclick="switchShipperTab('history')">✅ Lịch sử</button>
         </div>
 
-        <!-- ═══ TAB ĐƠN CỦA TÔI ═══ -->
         <div id="tabMine">
             <div class="ship-summary" id="mineStats"></div>
             <div id="mineList"></div>
         </div>
 
-        <!-- ═══ TAB NHẬN ĐƠN MỚI ═══ -->
         <div id="tabNew" style="display:none">
             <div class="admin-sort-bar">
                 <label>📍 Lọc theo khu vực:</label>
@@ -48,7 +46,6 @@
             <div id="newOrdersList"></div>
         </div>
 
-        <!-- ═══ TAB LỊCH SỬ ═══ -->
         <div id="tabHistory" style="display:none">
             <div id="historyList"></div>
         </div>
@@ -72,7 +69,6 @@
     <script>
         const me = getCurrentUser();
 
-        /* ═══ SWITCH TAB ═══ */
         function switchShipperTab(tab) {
             document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             document.getElementById("tabMine").style.display = tab === "mine" ? "block" : "none";
@@ -83,7 +79,6 @@
             if (tab === "history") renderHistoryOrders();
         }
 
-        /* ═══ TAB "ĐƠN CỦA TÔI" ═══ */
         function renderMineOrders() {
             const all = JSON.parse(localStorage.getItem("fox_orders")) || [];
             const myOrders = all.filter(o => o.shipperEmail === me.email && o.status === "shipping");
@@ -137,7 +132,6 @@
             }).join("");
         }
 
-        /* ═══ TAB "NHẬN ĐƠN MỚI" ═══ */
         function renderNewOrders() {
             const cityFilter = document.getElementById("filterCity").value;
             const list = getUnclaimedOrders(cityFilter);
@@ -174,7 +168,6 @@
   `).join("");
         }
 
-        /* ═══ TAB LỊCH SỬ ═══ */
         function renderHistoryOrders() {
             const all = JSON.parse(localStorage.getItem("fox_orders")) || [];
             const myDone = all.filter(o => o.shipperEmail === me.email && o.status === "delivered");
@@ -213,7 +206,6 @@
             }).join("");
         }
 
-        /* ═══ NHẬN ĐƠN ═══ */
         function handleClaim(orderId) {
             if (!confirm("Bạn muốn nhận đơn này?")) return;
             const res = shipperClaimOrder(orderId);
@@ -226,7 +218,6 @@
             }
         }
 
-        /* ═══ XÁC NHẬN ĐÃ GIAO ═══ */
         function handleDelivered(orderId) {
             if (!confirm("Xác nhận đã giao hàng thành công?\nUser sẽ có thể đánh giá sản phẩm và shipper.")) return;
             if (updateOrderStatus(orderId, "delivered")) {
@@ -237,14 +228,12 @@
             }
         }
 
-        /* ═══ ĐỊNH VỊ KHU VỰC ═══ */
         function autoDetectArea() {
             if (!navigator.geolocation) return showToast("❌ Trình duyệt không hỗ trợ Geolocation");
             showToast("📍 Đang xác định vị trí...");
             navigator.geolocation.getCurrentPosition(
                 pos => {
                     const { latitude: lat, longitude: lng } = pos.coords;
-                    // Tâm các thành phố
                     const cityCenters = {
                         "Đà Nẵng": { lat: 16.0544, lng: 108.2022 },
                         "Hà Nội": { lat: 21.0285, lng: 105.8542 },
@@ -271,12 +260,10 @@
             );
         }
 
-        /* ═══ INIT ═══ */
         document.addEventListener("DOMContentLoaded", () => {
             if (!requireShipper()) return;
             injectShipperLayout();
 
-            // Fill city select
             const sel = document.getElementById("filterCity");
             Object.keys(CITIES).forEach(c => {
                 sel.innerHTML += `<option value="${c}">🏙️ ${c}</option>`;

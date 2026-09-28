@@ -67,7 +67,7 @@ function getFooterHTML() {
           <p>📍 Đà Nẵng</p>
         </div>
       </div>
-      <div class="footer-bottom">© 2026 Fox Store – Assignment WEB1044</div>
+      <div class="footer-bottom">© 2026 Fox Store - Assignment WEB1044</div>
     </footer>`;
 }
 
@@ -82,7 +82,6 @@ function injectLayout(active) {
   if (typeof updateNotifBadge === "function") updateNotifBadge();
 }
 
-/* ═══ ADMIN LAYOUT ═══ */
 function injectAdminLayout() {
   const h = document.getElementById("header");
   const f = document.getElementById("footer");
@@ -101,12 +100,11 @@ function injectAdminLayout() {
         </div>
       </div>
     </header>`;
-  if (f) f.innerHTML = `<div class="admin-footer">© 2026 Fox Store Admin Panel – WEB1044</div>`;
+  if (f) f.innerHTML = `<div class="admin-footer">© 2026 Fox Store Admin Panel - WEB1044</div>`;
   if (typeof updateMsgBadge === "function") updateMsgBadge();
   if (typeof updateNotifBadge === "function") updateNotifBadge();
 }
 
-/* ═══ SHIPPER LAYOUT — có nút thông báo ═══ */
 function injectShipperLayout() {
   const h = document.getElementById("header");
   const f = document.getElementById("footer");
@@ -125,7 +123,7 @@ function injectShipperLayout() {
         </div>
       </div>
     </header>`;
-  if (f) f.innerHTML = `<div class="admin-footer shipper-footer">© 2026 Fox Store Shipper Panel – WEB1044</div>`;
+  if (f) f.innerHTML = `<div class="admin-footer shipper-footer">© 2026 Fox Store Shipper Panel - WEB1044</div>`;
   if (typeof updateMsgBadge === "function") updateMsgBadge();
   if (typeof updateNotifBadge === "function") updateNotifBadge();
 }

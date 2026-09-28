@@ -1,10 +1,6 @@
-// js/admin.js
 let editingId = null;
 let adminSort = { field: "id", dir: "asc" };
 
-/* ═══════════════════════════════════════════════════
-   SWITCH TABS
-   ═══════════════════════════════════════════════════ */
 function switchAdminTab(tab) {
   document.querySelectorAll(".admin-tabs button").forEach(b =>
     b.classList.toggle("active", b.dataset.tab === tab)
@@ -23,9 +19,6 @@ function switchAdminTab(tab) {
   else renderAdminTable();
 }
 
-/* ═══════════════════════════════════════════════════
-   SORT
-   ═══════════════════════════════════════════════════ */
 function changeAdminSort() {
   adminSort.field = document.getElementById("adminSortField").value;
   adminSort.dir = document.getElementById("adminSortDir").value;
@@ -51,9 +44,6 @@ function getSortedProducts() {
   return list;
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB PRODUCTS
-   ═══════════════════════════════════════════════════ */
 function renderAdminTable() {
   const list = getSortedProducts();
   const tbody = document.getElementById("adminTbody");
@@ -109,9 +99,6 @@ function renderAdminTable() {
   if (saleEl) saleEl.textContent = getProducts().filter(p => p.group === "sale" && p.stock > 0).length;
 }
 
-/* ═══════════════════════════════════════════════════
-   ĐÁNH LẠI ID
-   ═══════════════════════════════════════════════════ */
 function reindexIDs() {
   if (!confirm("Đánh lại ID từ #1, #2, #3... cho TẤT CẢ sản phẩm?\n\nThao tác này KHÔNG thể hoàn tác!")) return;
   const list = getProducts();
@@ -121,9 +108,6 @@ function reindexIDs() {
   renderAdminTable();
 }
 
-/* ═══════════════════════════════════════════════════
-   XUẤT CODE data.js
-   ═══════════════════════════════════════════════════ */
 function exportDataJS() {
   const products = getProducts();
   const code =
@@ -158,9 +142,6 @@ function copyExportCode() {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB ORDERS
-   ═══════════════════════════════════════════════════ */
 function renderAdminOrders() {
   const orders = getOrders();
   const shippers = getAllShippers();
@@ -228,9 +209,6 @@ function adminChangeOrderStatus(id, status) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB SHIPPERS
-   ═══════════════════════════════════════════════════ */
 function renderAdminShippers() {
   const pending = getPendingShippers();
   const approved = getAllShippers();
@@ -296,9 +274,6 @@ function handleRejectShipper(email) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB PHÂN TÍCH
-   ═══════════════════════════════════════════════════ */
 function renderAnalytics() {
   const box = document.getElementById("analyticsContent");
   if (!box) return;
@@ -404,9 +379,6 @@ function renderAnalytics() {
   `;
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB ĐÁNH GIÁ
-   ═══════════════════════════════════════════════════ */
 function renderAdminReviews() {
   const box = document.getElementById("reviewsContent");
   if (!box) return;
@@ -461,9 +433,6 @@ function renderAdminReviews() {
   `;
 }
 
-/* ═══════════════════════════════════════════════════
-   TAB THÔNG BÁO (BROADCAST)
-   ═══════════════════════════════════════════════════ */
 function renderBroadcasts() {
   const box = document.getElementById("broadcastContent");
   if (!box) return;
@@ -535,9 +504,6 @@ function handleDeleteBroadcast(id) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   CRUD MODAL
-   ═══════════════════════════════════════════════════ */
 function openAdd() {
   editingId = null;
   document.getElementById("modalTitle").textContent = "➕ Thêm sản phẩm";
@@ -655,18 +621,12 @@ function fillCategorySelect() {
   sel.innerHTML = getCategories().map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
 }
 
-/* ═══════════════════════════════════════════════════
-   CLOSE MODAL WHEN CLICK OUTSIDE
-   ═══════════════════════════════════════════════════ */
 document.addEventListener("click", e => {
   if (e.target.id === "modalOverlay") closeModal();
   if (e.target.id === "exportOverlay") closeExport();
   if (e.target.id === "reviewExportOverlay" && typeof closeReviewExport === "function") closeReviewExport();
 });
 
-/* ═══════════════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", () => {
   if (!requireAdmin()) return;
 

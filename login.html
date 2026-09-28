@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập – Fox Store</title>
+    <title>Đăng nhập - Fox Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -17,10 +17,10 @@
 
             <div class="auth-hint">
                 🔑 <b>Tài khoản test:</b><br>
-                • Admin: <b>contact@foxstore.com</b> (hoặc <b>owner</b> / <b>0987654321</b>) – mật khẩu
+                • Admin: <b>contact@foxstore.com</b> (hoặc <b>owner</b> / <b>0987654321</b>) - mật khẩu
                 <b>admin123</b><br>
-                • User: <b>user@foxstore.com</b> (hoặc <b>user</b>) – mật khẩu <b>user123</b><br>
-                • Shipper: <b>shipper@foxstore.com</b> (hoặc <b>shipper</b>) – mật khẩu <b>shipper123</b>
+                • User: <b>user@foxstore.com</b> (hoặc <b>user</b>) - mật khẩu <b>user123</b><br>
+                • Shipper: <b>shipper@foxstore.com</b> (hoặc <b>shipper</b>) - mật khẩu <b>shipper123</b>
             </div>
 
             <div class="auth-tabs">
@@ -29,7 +29,6 @@
                 <button class="auth-tab" data-tab="forgot" onclick="switchTab('forgot')">Quên mật khẩu</button>
             </div>
 
-            <!-- LOGIN -->
             <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Email / SĐT / Username</label>
@@ -49,7 +48,6 @@
                 <button type="submit" class="btn" style="width:100%">Đăng nhập</button>
             </form>
 
-            <!-- REGISTER -->
             <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label>Họ tên</label>
@@ -96,7 +94,6 @@
                 <button type="submit" class="btn" style="width:100%;margin-top:16px">Đăng ký</button>
             </form>
 
-            <!-- FORGOT -->
             <form class="auth-form" id="forgotForm" onsubmit="handleForgot(event)">
                 <p style="color:var(--muted);font-size:14px;margin-bottom:16px">
                     Nhập đúng <b style="color:var(--accent)">Họ tên + Email + SĐT</b> đã đăng ký để đổi mật khẩu.

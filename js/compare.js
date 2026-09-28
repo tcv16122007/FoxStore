@@ -9,18 +9,16 @@ function saveCompareList(list) {
     updateCompareBadge();
 }
 
-// Thêm vào so sánh + chuyển trang (dùng cho nút ⚖️ trên card)
 function addToCompareAndGo(id) {
     let list = getCompareList();
     if (!list.includes(id)) {
-        if (list.length >= COMPARE_MAX) list.shift(); // Bỏ cái cũ nhất
+        if (list.length >= COMPARE_MAX) list.shift();
         list.push(id);
         saveCompareList(list);
     }
     location.href = "compare.html";
 }
 
-// Dùng cho picker trong trang compare
 function setCompareSlot(slotIndex, id) {
     let list = getCompareList();
     while (list.length < COMPARE_MAX) list.push("");

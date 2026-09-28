@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>So sánh sản phẩm – Fox Store</title>
+    <title>So sánh sản phẩm - Fox Store</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -29,7 +29,6 @@
     </div>
     <div id="footer"></div>
 
-    <!-- MODAL PICKER -->
     <div class="modal-overlay" id="pickerOverlay">
         <div class="modal">
             <h3 id="pickerTitle">Chọn sản phẩm <button class="modal-close" onclick="closePicker()">×</button></h3>
@@ -67,15 +66,13 @@
     <script src="js/compare.js"></script>
     <script src="js/layout.js"></script>
     <script>
-        let pickerSlot = 0; // 0 = A, 1 = B
+        let pickerSlot = 0;
 
-        /* ═══ Đọc list, đảm bảo luôn có 2 slot ═══ */
         function getSlots() {
             const list = getCompareList();
             return [list[0] || "", list[1] || ""];
         }
 
-        /* ═══ RENDER 2 CỘT ═══ */
         function renderComparePage() {
             const grid = document.getElementById("compareGrid");
             const [idA, idB] = getSlots();
@@ -103,7 +100,6 @@
       </div>`;
             }
 
-            // Tính điểm để highlight
             const [idA, idB] = getSlots();
             const A = idA ? getProductById(idA) : null;
             const B = idB ? getProductById(idB) : null;
@@ -191,18 +187,15 @@
             renderComparePage();
         }
 
-        /* ═══ PICKER ═══ */
         function openPicker(slotIndex) {
             pickerSlot = slotIndex;
             document.getElementById("pickerTitle").innerHTML =
                 `Chọn sản phẩm cho cột ${slotIndex === 0 ? 'A' : 'B'} <button class="modal-close" onclick="closePicker()">×</button>`;
 
-            // Fill danh mục
             const catSel = document.getElementById("pickerCategory");
             catSel.innerHTML = `<option value="">Tất cả danh mục</option>` +
                 getCategories().map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
 
-            // Reset filter
             document.getElementById("pickerSearch").value = "";
             catSel.value = "";
             document.getElementById("pickerPrice").value = "";

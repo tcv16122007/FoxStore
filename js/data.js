@@ -1,4 +1,3 @@
-// ============ DÁN ĐOẠN NÀY VÀO js/data.js ============
 const DEFAULT_PRODUCTS = [
     {
         id: 1,
@@ -192,7 +191,6 @@ const CITIES = {
 
 const ADMIN_PHONE = "0987654321";
 
-/* ═══ 3 TÀI KHOẢN MẶC ĐỊNH ═══ */
 const DEFAULT_USERS = [
     { name: "Owner Fox Store", username: "owner", email: "contact@foxstore.com", phone: "0987654321", password: "admin123", role: "admin", shipperStatus: "none", createdAt: Date.now() },
     { name: "Nguyễn Văn User", username: "user", email: "user@foxstore.com", phone: "0901111111", password: "user123", role: "user", shipperStatus: "none", createdAt: Date.now() },
@@ -201,9 +199,7 @@ const DEFAULT_USERS = [
 
 const DEFAULT_MESSAGES = [];
 
-// ============ KHỞI TẠO ============
 function initData() {
-    // Products & Categories
     if (!localStorage.getItem("fox_products")) {
         localStorage.setItem("fox_products", JSON.stringify(DEFAULT_PRODUCTS));
     }
@@ -217,11 +213,9 @@ function initData() {
         localStorage.setItem("fox_messages", JSON.stringify(DEFAULT_MESSAGES));
     }
 
-    // ═══ SEED USERS ═══
     let users = JSON.parse(localStorage.getItem("fox_users")) || [];
     let changed = false;
 
-    // Migrate email admin cũ
     const OLD_ADMIN_EMAILS = ["owner@foxstore", "owner@foxstore.com"];
     users = users.map(u => {
         const c = { ...u };
@@ -239,8 +233,6 @@ function initData() {
         return c;
     });
 
-    // ⭐ SEED + FORCE UPDATE 3 TÀI KHOẢN MẶC ĐỊNH
-    // Nếu đã tồn tại → force update password/username/role để đảm bảo login được
     DEFAULT_USERS.forEach(def => {
         const existing = users.find(u =>
             u.email === def.email || u.username === def.username
@@ -249,7 +241,6 @@ function initData() {
             users.push({ ...def });
             changed = true;
         } else {
-            // Force update tất cả field để đảm bảo login luôn đúng
             if (existing.password !== def.password) { existing.password = def.password; changed = true; }
             if (existing.username !== def.username) { existing.username = def.username; changed = true; }
             if (existing.role !== def.role) { existing.role = def.role; changed = true; }
@@ -262,7 +253,6 @@ function initData() {
 
     if (changed) localStorage.setItem("fox_users", JSON.stringify(users));
 
-    // ═══ MIGRATE PRODUCTS (thêm images nếu thiếu) ═══
     const products = getProducts();
     let pChanged = false;
     const migrated = products.map(p => {
@@ -276,7 +266,6 @@ function initData() {
     if (pChanged) saveProducts(migrated);
 }
 
-// ============ CRUD API ============
 function getProducts() { return JSON.parse(localStorage.getItem("fox_products")) || []; }
 function saveProducts(list) { localStorage.setItem("fox_products", JSON.stringify(list)); }
 function getCategories() { return JSON.parse(localStorage.getItem("fox_categories")) || []; }
@@ -303,7 +292,6 @@ function updateProduct(id, data) {
 function deleteProduct(id) { saveProducts(getProducts().filter(p => p.id !== id)); }
 function resetProducts() { saveProducts([...DEFAULT_PRODUCTS]); }
 
-// ============ HELPERS ============
 const fmt = n => Number(n).toLocaleString("vi-VN") + "₫";
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
