@@ -65,6 +65,18 @@ function renderProductDetail() {
           <span>Còn lại: <b>${p.stock}</b></span>
         </div>
 
+        ${(() => {
+      const avg = typeof getProductAvgStars === "function" ? getProductAvgStars(p.id) : 0;
+      const cnt = typeof getProductReviewCount === "function" ? getProductReviewCount(p.id) : 0;
+      return cnt ? `
+            <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+              ${starsDisplay(avg, 20)}
+              <b style="color:#ffb020;font-size:16px">${avg.toFixed(1)}</b>
+              <a href="#reviewSection" style="color:var(--muted);font-size:13px;text-decoration:underline">${cnt} đánh giá</a>
+            </div>` : `
+            <div style="margin-bottom:16px;color:var(--muted);font-size:13px">Chưa có đánh giá</div>`;
+    })()}
+
         <div class="detail-price">
           <span class="now">${fmt(p.price)}</span>
           ${p.oldPrice ? `<span class="old">${fmt(p.oldPrice)}</span>` : ""}
@@ -98,9 +110,7 @@ function renderProductDetail() {
     ${videoId ? `
       <div class="video-section">
         <h3>🎬 Video review sản phẩm</h3>
-        <div class="video-wrap">
-          <div id="ytPlayer"></div>
-        </div>
+        <div class="video-wrap"><div id="ytPlayer"></div></div>
         <div class="video-controls">
           <button onclick="playerAction('play')" id="btnPlay">▶ Play</button>
           <button onclick="playerAction('pause')" id="btnPause">⏸ Pause</button>
@@ -138,7 +148,6 @@ function renderProductDetail() {
         <li>Thiết kế cao cấp, độ bền cao.</li>
         <li>Thương hiệu ${p.brand} uy tín toàn cầu.</li>
         <li>Bảo hành chính hãng 24 tháng tại Fox Store.</li>
-        <li>Hỗ trợ đổi trả trong 7 ngày nếu lỗi từ nhà sản xuất.</li>
       </ul>
     </div>
 
@@ -149,21 +158,22 @@ function renderProductDetail() {
         <li><b>Danh mục:</b> ${catName}</li>
         <li><b>Mã sản phẩm:</b> FOX-${String(p.id).padStart(4, "0")}</li>
         <li><b>Tình trạng:</b> Mới 100%, nguyên seal</li>
-        <li><b>Xuất xứ:</b> Chính hãng</li>
       </ul>
     </div>
 
     <div class="tab-panel" id="tabPolicy">
       <h4>Chính sách bảo hành</h4>
-      <ul>
-        <li>Bảo hành <b>24 tháng</b> theo tiêu chuẩn nhà sản xuất.</li>
-        <li>1 đổi 1 trong <b>30 ngày</b> nếu lỗi kỹ thuật từ NSX.</li>
-      </ul>
+      <ul><li>Bảo hành <b>24 tháng</b>.</li><li>1 đổi 1 trong <b>30 ngày</b> nếu lỗi NSX.</li></ul>
       <h4>Chính sách đổi trả</h4>
-      <ul>
-        <li>Đổi trả trong <b>7 ngày</b> kể từ khi nhận hàng.</li>
-        <li>Sản phẩm còn nguyên hộp, đầy đủ phụ kiện.</li>
-      </ul>
+      <ul><li>Đổi trả trong <b>7 ngày</b>.</li><li>Sản phẩm còn nguyên hộp.</li></ul>
+    </div>
+
+    <!-- ═══ ĐÁNH GIÁ SẢN PHẨM ═══ -->
+    <div id="reviewSection" style="margin-top:60px">
+      <div class="section-head">
+        <h2 class="section-title">⭐ Đánh giá sản phẩm</h2>
+      </div>
+      <div id="reviewContent"></div>
     </div>
 
     <div id="relatedSection" style="margin-top:60px">
@@ -174,8 +184,79 @@ function renderProductDetail() {
     </div>
   `;
 
+  renderProductReviews(p.id);
   renderRelated(p);
   if (videoId) initYouTube(videoId);
+}
+
+function renderProductReviews(productId) {
+  const box = document.getElementById("reviewContent");
+  if (!box) return;
+
+  const reviews = typeof getProductReviews === "function" ? getProductReviews(productId) : [];
+  const avg = typeof getProductAvgStars === "function" ? getProductAvgStars(productId) : 0;
+  const total = reviews.length;
+
+  if (!total) {
+    box.innerHTML = `
+      <div class="review-empty">
+        <div style="font-size:56px;margin-bottom:12px;opacity:.4">⭐</div>
+        <h3 style="color:var(--text);margin-bottom:8px">Chưa có đánh giá nào</h3>
+        <p style="color:var(--muted)">Hãy mua và đánh giá sản phẩm này sau khi nhận hàng!</p>
+      </div>`;
+    return;
+  }
+
+  const starCounts = [5, 4, 3, 2, 1].map(star => ({
+    star,
+    count: reviews.filter(r => Math.round(r.stars) === star).length
+  }));
+
+  box.innerHTML = `
+    <div class="review-summary">
+      <div class="review-big-score">
+        <div class="score">${avg.toFixed(1)}</div>
+        <div style="margin:8px 0">${starsDisplay(avg, 22)}</div>
+        <div class="total">${total} đánh giá</div>
+      </div>
+      <div class="review-bars">
+        ${starCounts.map(s => {
+    const pct = total ? (s.count / total * 100) : 0;
+    return `
+            <div class="review-bar-row">
+              <span class="star-num">${s.star} ⭐</span>
+              <div class="review-bar">
+                <div class="review-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span class="star-count">${s.count}</span>
+            </div>`;
+  }).join("")}
+      </div>
+    </div>
+
+    <div class="review-list">
+      ${reviews.slice(0, 10).map(r => `
+        <div class="review-item">
+          <div class="review-avatar">${(r.userName || "U").charAt(0).toUpperCase()}</div>
+          <div class="review-body">
+            <div class="review-head">
+              <div>
+                <b>${r.userName || "Ẩn danh"}</b>
+                <span class="review-time">${formatDate(r.createdAt)}</span>
+              </div>
+              ${starsDisplay(r.stars, 14)}
+            </div>
+            ${r.comment ? `<div class="review-text">"${r.comment}"</div>` : ""}
+          </div>
+        </div>
+      `).join("")}
+    </div>
+
+    ${reviews.length > 10 ? `
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:16px">
+        Hiển thị 10 / ${reviews.length} đánh giá
+      </p>` : ""}
+  `;
 }
 
 function switchThumb(el, src) {
@@ -183,29 +264,24 @@ function switchThumb(el, src) {
   document.querySelectorAll(".detail-thumb").forEach(t => t.classList.remove("active"));
   el.classList.add("active");
 }
-
 function changeQtyDetail(delta) {
   currentQty = Math.max(1, currentQty + delta);
   document.getElementById("detailQty").textContent = currentQty;
 }
-
 function handleAddCart() {
   if (currentProduct) addToCart(currentProduct.id, currentQty);
 }
-
 function handleBuyNow() {
   if (!currentProduct) return;
   addToCart(currentProduct.id, currentQty);
   setTimeout(() => location.href = "cart.html", 400);
 }
-
 function switchTabDetail(btn, panelId) {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
   btn.classList.add("active");
   document.getElementById(panelId).classList.add("active");
 }
-
 function renderRelated(p) {
   const list = getProducts().filter(x => x.category === p.category && x.id !== p.id).slice(0, 4);
   const box = document.getElementById("gridRelated");
@@ -219,20 +295,15 @@ function renderRelated(p) {
 function initYouTube(videoId) {
   function createPlayer() {
     ytPlayer = new YT.Player("ytPlayer", {
-      height: "100%",
-      width: "100%",
-      videoId: videoId,
+      height: "100%", width: "100%", videoId: videoId,
       playerVars: {
-        controls: 0,
-        modestbranding: 1,
-        rel: 0,
+        controls: 0, modestbranding: 1, rel: 0,
         origin: window.location.origin,
-        cc_load_policy: 0,
-        cc_lang_pref: "vi"
+        cc_load_policy: 0, cc_lang_pref: "vi"
       },
       events: {
         onReady: () => {
-          console.log("✅ YouTube Player ready");
+          console.log("✅ YouTube ready");
           ytPlayer.setVolume(100);
         }
       }
@@ -244,22 +315,10 @@ function initYouTube(videoId) {
 
 function playerAction(action) {
   if (!ytPlayer || !ytPlayer.getPlayerState) return;
-
   switch (action) {
-    case "play":
-      ytPlayer.playVideo();
-      setActiveBtn("btnPlay");
-      break;
-
-    case "pause":
-      ytPlayer.pauseVideo();
-      setActiveBtn("btnPause");
-      break;
-
-    case "stop":
-      ytPlayer.stopVideo();
-      setActiveBtn(null);
-      break;
+    case "play": ytPlayer.playVideo(); setActiveBtn("btnPlay"); break;
+    case "pause": ytPlayer.pauseVideo(); setActiveBtn("btnPause"); break;
+    case "stop": ytPlayer.stopVideo(); setActiveBtn(null); break;
 
     case "rewind": {
       const current = ytPlayer.getCurrentTime() || 0;
@@ -268,7 +327,6 @@ function playerAction(action) {
       showToast("⏪ Tua ngược 10 giây");
       break;
     }
-
     case "forward": {
       const current = ytPlayer.getCurrentTime() || 0;
       const duration = ytPlayer.getDuration() || 0;
@@ -284,14 +342,8 @@ function playerAction(action) {
       document.getElementById("btnMute").textContent = muted ? "🔊 Mute" : "🔇 Unmute";
       const slider = document.getElementById("volumeSlider");
       const lbl = document.getElementById("volumeValue");
-      if (!muted) {
-        slider.value = 0;
-        lbl.textContent = "0%";
-      } else {
-        const v = ytPlayer.getVolume();
-        slider.value = v;
-        lbl.textContent = v + "%";
-      }
+      if (!muted) { slider.value = 0; lbl.textContent = "0%"; }
+      else { const v = ytPlayer.getVolume(); slider.value = v; lbl.textContent = v + "%"; }
       break;
     }
   }
@@ -311,7 +363,6 @@ function setVolume(val) {
     document.getElementById("btnMute").textContent = "🔇 Unmute";
   }
 }
-
 function toggleCC(enabled) {
   if (!ytPlayer || !ytPlayer.loadModule) return;
   if (enabled) {
@@ -324,12 +375,10 @@ function toggleCC(enabled) {
     showToast("💬 Đã tắt phụ đề");
   }
 }
-
 function toggleFullscreen() {
   if (!ytPlayer || !ytPlayer.getIframe) return;
   const iframe = ytPlayer.getIframe();
   const wrap = iframe.parentElement;
-
   if (document.fullscreenElement) {
     document.exitFullscreen();
     document.getElementById("btnFull").textContent = "⛶ Toàn màn hình";
@@ -339,12 +388,10 @@ function toggleFullscreen() {
     }).catch(() => iframe.requestFullscreen?.());
   }
 }
-
 document.addEventListener("fullscreenchange", () => {
   const btn = document.getElementById("btnFull");
   if (btn) btn.textContent = document.fullscreenElement ? "⛶ Thoát fullscreen" : "⛶ Toàn màn hình";
 });
-
 function setActiveBtn(id) {
   document.querySelectorAll(".video-controls button").forEach(b => b.classList.remove("active"));
   if (id) document.getElementById(id)?.classList.add("active");

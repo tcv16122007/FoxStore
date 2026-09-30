@@ -3343,3 +3343,241 @@ select.form-control {
         font-size: 22px;
     }
 }
+
+.review-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.review-summary {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 30px;
+    padding: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 20px;
+}
+
+.review-big-score {
+    text-align: center;
+    padding: 12px;
+    border-right: 1px solid var(--border);
+}
+
+.review-big-score .score {
+    font-size: 56px;
+    font-weight: 800;
+    color: #ffb020;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.review-big-score .total {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+}
+
+.review-bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.review-bar-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 40px;
+    gap: 12px;
+    align-items: center;
+    font-size: 13px;
+}
+
+.review-bar-row .star-num {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.review-bar-row .star-count {
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+}
+
+.review-bar {
+    height: 8px;
+    background: var(--bg-2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.review-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffb020, #ff8533);
+    border-radius: 4px;
+    transition: width .4s;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.review-item {
+    display: flex;
+    gap: 14px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: .2s;
+}
+
+.review-item:hover {
+    border-color: var(--border-2);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.review-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #000;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.review-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.review-head b {
+    color: var(--text);
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+.review-time {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.review-text {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    font-style: italic;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+}
+
+@media (max-width: 900px) {
+    .review-summary {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .review-big-score {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 20px;
+    }
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.chat-review-btn {
+    background: linear-gradient(135deg, #ffb020, #ff8533);
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.chat-review-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 176, 32, .35);
+}
+
+.shipper-review-info {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(0, 168, 255, .08);
+    border: 1px solid var(--info);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.shipper-review-info .shipper-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(0, 168, 255, .2);
+    border: 2px solid var(--info);
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.shipper-review-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.shipper-review-info p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.review-form-box {
+    padding: 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.review-form-box h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

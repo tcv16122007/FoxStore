@@ -35,13 +35,14 @@
     </div>
     <div id="footer"></div>
 
+    <!-- MODAL EXPORT CHAT -->
     <div class="modal-overlay" id="chatExportOverlay">
         <div class="modal" style="max-width:900px">
             <h3>📋 Xuất code chat <button class="modal-close" onclick="closeChatExport()">x</button></h3>
             <div class="export-hint"
                 style="background:rgba(0,168,255,.08);border-left:3px solid #00a8ff;padding:12px 16px;border-radius:8px;font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.7">
                 <b style="color:#00a8ff">Hướng dẫn:</b> 1. Bấm <b>📋 Copy</b> → 2. Mở <code>js/data.js</code> → 3. Thay
-                <code>const DEFAULT_MESSAGES = []</code> → 4. Paste → 5. Ctrl+S
+                <code>DEFAULT_MESSAGES</code> → 4. Paste → 5. Ctrl+S
             </div>
             <textarea id="chatExportCode" readonly spellcheck="false"
                 style="width:100%;min-height:400px;padding:16px;background:#0d0d0d;border:1px solid var(--border);border-radius:10px;color:#00ff88;font-family:'SF Mono',Consolas,monospace;font-size:12px;line-height:1.6;outline:none;resize:vertical;white-space:pre;overflow-x:auto"></textarea>
@@ -50,6 +51,12 @@
                 <button class="btn" style="background:linear-gradient(135deg,#00a8ff,#0090e0);color:#000"
                     onclick="copyChatExport()">📋 Copy toàn bộ</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="shipperReviewOverlay">
+        <div class="modal" style="max-width:640px">
+            <div id="shipperReviewContent"></div>
         </div>
     </div>
 
@@ -133,6 +140,10 @@
             const isOwner = other.role === "admin";
             const isShipper = other.shipperStatus === "approved";
 
+            const reviewBtn = isShipper
+                ? `<button class="chat-review-btn" onclick="openShipperReviewModal('${other.email}')">⭐ Đánh giá shipper</button>`
+                : "";
+
             main.innerHTML = `
     <div class="chat-header">
       <div style="display:flex;align-items:center;gap:12px">
@@ -146,6 +157,7 @@
           </div>
         </div>
       </div>
+      ${reviewBtn}
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -196,6 +208,124 @@
             }, 50);
         }
 
+        function openShipperReviewModal(shipperEmail) {
+            const shipper = getUsers().find(u => u.email === shipperEmail);
+            if (!shipper) return;
+
+            const allReviews = getShipperReviews().filter(r => r.shipperEmail === shipperEmail);
+            const avg = getShipperAvgStars(shipperEmail);
+            const total = allReviews.length;
+
+            const orders = JSON.parse(localStorage.getItem("fox_orders")) || [];
+            const reviewableOrder = orders.find(o =>
+                o.userEmail === me.email &&
+                o.shipperEmail === shipperEmail &&
+                o.status === "delivered" &&
+                !getShipperReviewByOrder(o.id)
+            );
+            const hasDelivered = orders.some(o =>
+                o.userEmail === me.email &&
+                o.shipperEmail === shipperEmail &&
+                o.status === "delivered"
+            );
+
+            let html = `
+    <h3 style="margin-bottom:20px">
+      ⭐ Đánh giá shipper
+      <button class="modal-close" onclick="closeShipperReviewModal()">×</button>
+    </h3>
+
+    <div class="shipper-review-info">
+      <div class="shipper-avatar">🚚</div>
+      <div style="flex:1">
+        <h4>${shipper.name}</h4>
+        <p>${shipper.email} • ${shipper.phone}</p>
+        <div style="margin-top:8px">
+          ${total
+                    ? `${starsDisplay(avg, 20)} <b style="color:#ffb020;font-size:18px;margin-left:6px">${avg.toFixed(1)}</b> <span style="color:var(--muted);font-size:13px">(${total} đánh giá)</span>`
+                    : `<span style="color:var(--muted);font-size:13px">Chưa có đánh giá nào</span>`}
+        </div>
+      </div>
+    </div>
+  `;
+
+            if (!isShipper() && !isAdmin()) {
+                if (reviewableOrder) {
+                    html += `
+        <div class="review-form-box">
+          <h4>✍️ Đánh giá của bạn</h4>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">
+            Đơn #${reviewableOrder.id} – Giao lúc ${formatDate(reviewableOrder.updatedAt)}
+          </p>
+          ${starPickerHTML("shipperChatStars", 0)}
+          <textarea class="form-control" id="shipperChatComment" rows="3"
+                    placeholder="Nhận xét về shipper (không bắt buộc)..."
+                    style="margin-top:12px;font-size:13px"></textarea>
+          <button class="btn" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#ffb020,#ff8533);color:#000"
+                  onclick="submitShipperReviewFromChat('${reviewableOrder.id}', '${shipperEmail}')">
+            📤 Gửi đánh giá
+          </button>
+        </div>
+      `;
+                } else if (hasDelivered) {
+                    html += `
+        <div class="review-form-box" style="text-align:center;background:rgba(22,199,132,.08);border-color:var(--success)">
+          <p style="color:var(--success);font-size:14px">✅ Bạn đã đánh giá shipper này rồi</p>
+        </div>
+      `;
+                } else {
+                    html += `
+        <div class="review-form-box" style="text-align:center">
+          <p style="color:var(--muted);font-size:13px">
+            💡 Bạn chỉ có thể đánh giá shipper sau khi đơn hàng đã được giao thành công.
+          </p>
+        </div>
+      `;
+                }
+            }
+
+            if (total) {
+                html += `
+      <div style="margin-top:8px">
+        <h4 style="margin-bottom:12px;font-size:14px">📝 Tất cả đánh giá (${total})</h4>
+        <div class="review-list" style="max-height:320px;overflow-y:auto;padding-right:4px">
+          ${allReviews.sort((a, b) => b.createdAt - a.createdAt).slice(0, 20).map(r => `
+            <div class="review-item">
+              <div class="review-avatar">${(r.userName || "U").charAt(0).toUpperCase()}</div>
+              <div class="review-body">
+                <div class="review-head">
+                  <div>
+                    <b>${r.userName}</b>
+                    <span class="review-time">${formatDate(r.createdAt)}</span>
+                  </div>
+                  ${starsDisplay(r.stars, 14)}
+                </div>
+                ${r.comment ? `<div class="review-text">"${r.comment}"</div>` : ""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+            }
+
+            document.getElementById("shipperReviewContent").innerHTML = html;
+            document.getElementById("shipperReviewOverlay").classList.add("show");
+        }
+
+        function closeShipperReviewModal() {
+            document.getElementById("shipperReviewOverlay").classList.remove("show");
+        }
+
+        function submitShipperReviewFromChat(orderId, shipperEmail) {
+            const stars = getStarValue("shipperChatStars");
+            if (!stars) return showToast("❌ Vui lòng chọn số sao!");
+            const comment = document.getElementById("shipperChatComment").value;
+            addShipperReview(orderId, shipperEmail, me.email, me.name, stars, comment);
+            showToast("✅ Đã gửi đánh giá shipper!");
+            closeShipperReviewModal();
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             if (!requireUser(true)) return;
 
@@ -239,6 +369,7 @@
 
         document.addEventListener("click", e => {
             if (e.target.id === "chatExportOverlay") closeChatExport();
+            if (e.target.id === "shipperReviewOverlay") closeShipperReviewModal();
         });
     </script>
 </body>
